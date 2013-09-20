@@ -1,0 +1,42 @@
+{
+    "id": "simpleweb4j-mongodb-clickstart",
+    "name": "SimpleWeb4j MongoDb clickstart",
+    "source": "github",
+    "description" : "SimpleWeb4j application connected to a MongoHQ database",
+    "icon" : "https://raw.github.com/ybonnel/SimpleWeb4j/master/images/logo-simpleweb4j-140.png",
+
+    "supported-by" : "community",
+    "order" : 5,
+
+    "runtime": {
+        "type": "java",
+        "app-parameters" : { 
+            "runtime.java_version": "1.7",
+            "runtime.class": "com.mycompany.Main"
+        }
+        
+    },
+    "services": [
+        {
+            "name": "mongohq",
+            "plan": "base",
+            "settings": {},
+            "resources": [
+                {
+                    "type": "mongodb",
+                    "alias": "beers",
+                    "settings": {
+                        "plan": "sandbox"
+                    }
+                }
+            ]
+        }
+    ],
+    "build-with-jenkins": {
+        "template": {
+            "type": "https://raw.github.com/CloudBees-community/simpleweb4j-mongo-clickstart/master/jenkins.xml",
+            "options": {
+            }            
+        }
+    }
+}

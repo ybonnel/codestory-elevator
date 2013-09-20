@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Beer shop</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+        <link href="css/app.less" rel="stylesheet">
+    </head>
+    <body ng-app="simpleweb4j-experiments">
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="brand" href="/">simpleweb4j-experiments</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- angular will insert the template in container -->
+        <div class="container">
+            <div class="content" ng-view>
+            </div>
+        </div>
+
+
+        <!-- Placed javascripts at the end of the document so the pages load faster -->
+        <script src="js/jquery.min.js"></script>
+        <script src="js/angular.min.js"></script>
+        <script src="js/angular-resource.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/app.js"></script>
+        <script src="js/controllers.js"></script>
+        <script src="js/services.js"></script>
+    </body>
+</html>

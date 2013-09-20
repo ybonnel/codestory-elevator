@@ -1,0 +1,61 @@
+@toppadding: 60px;
+@grey: #eee;
+@white: #fff;
+
+html, body {
+  background-color: @grey;
+}
+
+body {
+  .container {
+    .content {
+      background-color: @white;
+      padding: 20px;
+      margin-top: @toppadding;
+      margin-right: -30px;/* negative indent the amount of the padding to maintain the grid system */
+      border-radius: 6px;
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, .15);
+      .relative {
+        position: relative;
+        margin-bottom: 40px;
+        .right-btn {
+          position: absolute;
+          right: 0;
+          top: 0;
+        }
+      }
+      #beers {
+        th.name {
+          width: 80%;
+          min-width: 150px;
+        }
+        th.edit {
+          with: 10%;
+          min-width: 20px;
+        }
+        th.remove {
+          with: 10%;
+          min-width: 20px;
+        }
+        td.edit {
+          text-align: center;
+        }
+        td.remove {
+          text-align: center;
+        }
+      }
+      form {
+        margin-bottom: 0px;
+        .form-actions {
+          background-color: #ffffff;
+          margin-bottom: 0px;
+        }
+      }
+    }
+    footer {
+      p {
+        text-align: center;
+      }
+    }
+  }
+}
