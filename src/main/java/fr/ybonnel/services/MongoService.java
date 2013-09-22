@@ -14,19 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mycompany.services;
+package fr.ybonnel.services;
 
 import com.google.code.morphia.Datastore;
 import com.google.code.morphia.Morphia;
 import com.mongodb.MongoClient;
-import com.mycompany.model.Beer;
 
 public class MongoService {
 
     private static Datastore datastore;
 
     public static void setMongoClient(MongoClient mongoClient, String dbName) {
-        datastore = new Morphia().map(Beer.class).createDatastore(mongoClient, dbName);
+        datastore = new Morphia().map(
+
+        ).createDatastore(mongoClient, dbName);
     }
 
     public static Datastore getDatastore() {

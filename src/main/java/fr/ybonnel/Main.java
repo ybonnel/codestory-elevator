@@ -1,9 +1,10 @@
-package com.mycompany;
+package fr.ybonnel;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mycompany.services.BeerRessource;
-import com.mycompany.services.MongoService;
+import fr.ybonnel.services.Elevator;
+import fr.ybonnel.services.ElevatorService;
+import fr.ybonnel.services.MongoService;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
@@ -11,7 +12,16 @@ import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.runtime.Network;
+import fr.ybonnel.services.NearestElevator;
+import fr.ybonnel.services.Omnibus;
+import fr.ybonnel.services.UpAndDownElevator;
+import fr.ybonnel.services.UpAndDownWithDirectionElevator;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -22,6 +32,13 @@ import static fr.ybonnel.simpleweb4j.SimpleWeb4j.*;
  */
 public class Main {
 
+    public final static Elevator elevators[] = {
+            new Omnibus(),
+            new UpAndDownElevator(),
+            new NearestElevator(),
+            new UpAndDownWithDirectionElevator()
+    };
+
 
     /**
      * Start the server.
@@ -29,20 +46,21 @@ public class Main {
      * @param waitStop true to wait the stop.
      */
     public static void startServer(int port, boolean waitStop, int portMongo) throws IOException {
-        startMongoIfNeeded(waitStop, portMongo);
-        bindMongoClient(portMongo);
+        //startMongoIfNeeded(waitStop, portMongo);
+        //bindMongoClient(portMongo);
 
         // Set the http port.
         setPort(port);
         // Set the path to static resources.
-        setPublicResourcesPath("/com/mycompany/public");
+        setPublicResourcesPath("/fr/ybonnel/public");
 
-        // Add resource for beers on "/beer"
-        resource(new BeerRessource("/beer"));
+        for (Elevator elevator : elevators) {
+            new ElevatorService("/" + elevator.getClass().getSimpleName(), elevator).registerRoutes();
+        }
 
         // Start the server.
         start(waitStop);
-        stopMongoIfNeeded(waitStop);
+        //stopMongoIfNeeded(waitStop);
     }
 
 

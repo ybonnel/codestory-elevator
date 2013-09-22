@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mycompany;
+package fr.ybonnel;
 
 import com.mongodb.MongoClient;
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -33,7 +33,7 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 import java.util.Random;
 
-import static com.mycompany.Main.startServer;
+import static fr.ybonnel.Main.startServer;
 import static fr.ybonnel.simpleweb4j.SimpleWeb4j.stop;
 
 /**
