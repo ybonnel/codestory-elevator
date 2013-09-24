@@ -73,7 +73,11 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
 
     @Override
     public Command nextCommand() {
+        Command precCommand = lastCommand;
         lastCommand = getNextCommand();
+        if (precCommand == Command.NOTHING && lastCommand == Command.NOTHING) {
+            reset("Two successive NOTHING");
+        }
         return lastCommand;
     }
 
