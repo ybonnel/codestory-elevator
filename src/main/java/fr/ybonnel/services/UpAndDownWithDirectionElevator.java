@@ -89,11 +89,11 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
                 logState();
                 return close();
             } else {
-                if (lastCommand != Command.CLOSE && openIfSomeoneWaiting()) return openIfCan();
+                if (openIfSomeoneWaiting()) return openIfCan();
                 if (!containsFloorForCurrentDirection()) {
                     currentDirection = currentDirection.getOtherDirection();
                 }
-                if (lastCommand != Command.CLOSE && openIfSomeoneWaiting()) return openIfCan();
+                if (openIfSomeoneWaiting()) return openIfCan();
                 currentFloor += currentDirection.incForCurrentFloor;
                 logState();
                 return currentDirection.commandToGo;
