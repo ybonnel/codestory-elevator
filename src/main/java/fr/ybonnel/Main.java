@@ -2,9 +2,6 @@ package fr.ybonnel;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import fr.ybonnel.services.Elevator;
-import fr.ybonnel.services.ElevatorService;
-import fr.ybonnel.services.MongoService;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
@@ -12,16 +9,14 @@ import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.runtime.Network;
+import fr.ybonnel.services.Elevator;
+import fr.ybonnel.services.ElevatorService;
+import fr.ybonnel.services.MongoService;
 import fr.ybonnel.services.NearestElevator;
 import fr.ybonnel.services.Omnibus;
 import fr.ybonnel.services.UpAndDownElevator;
 import fr.ybonnel.services.UpAndDownWithDirectionElevator;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -57,6 +52,7 @@ public class Main {
         for (Elevator elevator : elevators) {
             new ElevatorService("/" + elevator.getClass().getSimpleName(), elevator).registerRoutes();
         }
+        new ElevatorService("/", new UpAndDownWithDirectionElevator()).registerRoutes();
 
         // Start the server.
         start(waitStop);
