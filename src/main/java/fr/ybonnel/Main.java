@@ -52,7 +52,7 @@ public class Main {
         for (Elevator elevator : elevators) {
             new ElevatorService("/" + elevator.getClass().getSimpleName(), elevator).registerRoutes();
         }
-        new ElevatorService("/", new UpAndDownWithDirectionElevator()).registerRoutes();
+        new ElevatorService("", new UpAndDownWithDirectionElevator()).registerRoutes();
 
         // Start the server.
         start(waitStop);
