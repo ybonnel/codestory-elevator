@@ -69,14 +69,11 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
                 || !floorsToGo.get(Direction.DOWN).isEmpty();
     }
 
-    private Command lastCommand = null;
-
     private int nbNothing = 0;
 
     @Override
     public Command nextCommand() {
-        Command precCommand = lastCommand;
-        lastCommand = getNextCommand();
+        Command lastCommand = getNextCommand();
         if (lastCommand == Command.NOTHING) {
             nbNothing++;
         } else {
@@ -124,15 +121,19 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     @Override
     public void call(int floor, String to) {
         logState();
-        floorsToGo.get(Direction.valueOf(to)).add(floor);
+        if (floor != currentFloor || isClose()) {
+            floorsToGo.get(Direction.valueOf(to)).add(floor);
+        }
         logState();
     }
 
     @Override
     public void go(int floorToGo) {
         logState();
-        floorsToGo.get(Direction.DOWN).add(floorToGo);
-        floorsToGo.get(Direction.UP).add(floorToGo);
+        if (floorToGo != currentFloor || isClose()) {
+            floorsToGo.get(Direction.DOWN).add(floorToGo);
+            floorsToGo.get(Direction.UP).add(floorToGo);
+        }
         logState();
     }
 
