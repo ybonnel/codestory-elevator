@@ -16,7 +16,6 @@
  */
 package fr.ybonnel.services;
 
-import com.google.common.base.Joiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +40,8 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
 
     public void logState() {
         logger.info("CurrentDirection : {}", currentDirection);
-        logger.info("FloorsToGo for {} : [{}]", Direction.DOWN, Joiner.on(",").join(floorsToGo.get(Direction.DOWN)));
-        logger.info("FloorsToGo for {} : [{}]", Direction.UP, Joiner.on(",").join(floorsToGo.get(Direction.UP)));
+        logger.info("FloorsToGo for {} : [{}]", Direction.DOWN, floorsToGo.get(Direction.DOWN));
+        logger.info("FloorsToGo for {} : [{}]", Direction.UP, floorsToGo.get(Direction.DOWN));
     }
 
 

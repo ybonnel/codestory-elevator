@@ -110,6 +110,16 @@
         <dependency>
             <groupId>fr.ybonnel</groupId>
             <artifactId>simpleweb4j</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <!-- Use slf4j for logs -->
         <dependency>
@@ -137,12 +147,6 @@
             <groupId>fr.ybonnel</groupId>
             <artifactId>simpleweb4j-test</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>15.0</version>
         </dependency>
     </dependencies>
 
