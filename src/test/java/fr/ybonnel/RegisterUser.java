@@ -18,6 +18,7 @@ package fr.ybonnel;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import fr.ybonnel.services.Elevator;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class RegisterUser {
@@ -43,6 +44,7 @@ public class RegisterUser {
     }
 
     @Test
+    @Ignore
     public void registerUsers() {
 
         for (Elevator elevator : Main.elevators) {
