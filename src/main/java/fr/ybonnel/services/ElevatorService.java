@@ -17,20 +17,13 @@
 package fr.ybonnel.services;
 
 import fr.ybonnel.simpleweb4j.exception.HttpErrorException;
+import fr.ybonnel.simpleweb4j.handlers.ContentType;
 import fr.ybonnel.simpleweb4j.handlers.Response;
 import fr.ybonnel.simpleweb4j.handlers.Route;
 import fr.ybonnel.simpleweb4j.handlers.RouteParameters;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-import static fr.ybonnel.simpleweb4j.SimpleWeb4j.addSpecificHandler;
 import static fr.ybonnel.simpleweb4j.SimpleWeb4j.get;
 
 public class ElevatorService {
@@ -46,20 +39,16 @@ public class ElevatorService {
         this.logger = LoggerFactory.getLogger(elevator.getClass());
     }
 
-    public AbstractHandler getHandler() {
-        return new AbstractHandler() {
+    public Route<Void, Command> getNextCommandRoute() {
+        return new Route<Void, Command>(route + "/nextCommand", Void.class, ContentType.PLAIN_TEXT) {
             @Override
-            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-                if (request.getPathInfo().equals(route + "/nextCommand")) {
-                    Command nextCommand;
-                    synchronized (elevator) {
-                        nextCommand = elevator.nextCommand();
-                    }
-                    logger.info("Call of nextCommand, response : {}", nextCommand);
-                    response.getWriter().print(nextCommand);
-                    response.getWriter().flush();
-                    response.getWriter().close();
+            public Response<Command> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                Command nextCommand;
+                synchronized (elevator) {
+                    nextCommand = elevator.nextCommand();
                 }
+                logger.info("Call of nextCommand, response : {}", nextCommand);
+                return new Response<>(nextCommand);
             }
         };
     }
@@ -131,7 +120,7 @@ public class ElevatorService {
     }
 
     public void registerRoutes() {
-        addSpecificHandler(getHandler());
+        get(getNextCommandRoute());
         get(getResetRoute());
         get(getCallRoute());
         get(getGoRoute());

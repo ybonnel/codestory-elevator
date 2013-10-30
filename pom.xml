@@ -20,7 +20,7 @@
         <plugin.dependency.version>2.6</plugin.dependency.version>
 
         <!-- dependencies versions -->
-        <dependency.simpleweb4j.version>0.0.5</dependency.simpleweb4j.version>
+        <dependency.simpleweb4j.version>0.0.6</dependency.simpleweb4j.version>
         <dependency.slf4j.version>1.7.2</dependency.slf4j.version>
 
         <!-- test dependencies versions -->
