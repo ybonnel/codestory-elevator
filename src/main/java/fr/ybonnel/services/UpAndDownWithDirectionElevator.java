@@ -29,6 +29,8 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
 
     Direction currentDirection;
 
+    private boolean mustReset = true;
+
     private Map<Direction, HashSet<Integer>> floorsToGo = new HashMap<Direction, HashSet<Integer>>(){{
         put(Direction.DOWN, new HashSet<Integer>());
         put(Direction.UP, new HashSet<Integer>());
@@ -72,13 +74,16 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
 
     @Override
     public Command nextCommand() {
+        if (mustReset) {
+            return Command.CLOSE;
+        }
         Command lastCommand = getNextCommand();
         if (lastCommand == Command.NOTHING) {
             nbNothing++;
         } else {
             nbNothing = 0;
         }
-        if (nbNothing > 10) {
+        if (nbNothing > 200) {
             reset("Ten successive NOTHING");
         }
         return lastCommand;
@@ -147,6 +152,7 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     @Override
     public void reset(String cause) {
         super.reset(cause);
+        mustReset = false;
         currentDirection = Direction.UP;
         floorsToGo.get(Direction.DOWN).clear();
         floorsToGo.get(Direction.UP).clear();
