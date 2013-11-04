@@ -30,6 +30,15 @@ public abstract class CleverElevator implements Elevator {
         }
     }
 
+    protected Command closeIfCan() {
+        if (isOpen()) {
+            currentState = State.CLOSE;
+            return Command.CLOSE;
+        } else {
+            return Command.NOTHING;
+        }
+    }
+
     @Override
     public void reset(String cause) {
         currentFloor = 0;

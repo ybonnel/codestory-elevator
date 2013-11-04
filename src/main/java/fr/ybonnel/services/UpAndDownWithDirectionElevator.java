@@ -35,9 +35,10 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         put(Direction.DOWN, new HashSet<Integer>());
         put(Direction.UP, new HashSet<Integer>());
     }};
+    private Command lastCommand;
 
     public UpAndDownWithDirectionElevator() {
-        reset(null);
+        reset("START");
     }
 
     public void logState() {
@@ -77,7 +78,7 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         if (mustReset) {
             return Command.CLOSE;
         }
-        Command lastCommand = getNextCommand();
+        lastCommand = getNextCommand();
         if (lastCommand == Command.NOTHING) {
             nbNothing++;
         } else {
@@ -97,17 +98,17 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
                 logState();
                 return close();
             } else {
-                if (openIfSomeoneWaiting()) return openIfCan();
+                if (openIfSomeoneWaiting() && lastCommand != Command.CLOSE) return openIfCan();
                 if (!containsFloorForCurrentDirection()) {
                     currentDirection = currentDirection.getOtherDirection();
                 }
-                if (openIfSomeoneWaiting()) return openIfCan();
+                if (openIfSomeoneWaiting() && lastCommand != Command.CLOSE) return openIfCan();
                 currentFloor += currentDirection.incForCurrentFloor;
                 logState();
                 return currentDirection.commandToGo;
             }
         } else {
-            return openIfCan();
+            return closeIfCan();
         }
     }
 
@@ -152,7 +153,9 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     @Override
     public void reset(String cause) {
         super.reset(cause);
-        mustReset = false;
+        if (!"START".equals(cause)) {
+            mustReset = false;
+        }
         currentDirection = Direction.UP;
         floorsToGo.get(Direction.DOWN).clear();
         floorsToGo.get(Direction.UP).clear();
