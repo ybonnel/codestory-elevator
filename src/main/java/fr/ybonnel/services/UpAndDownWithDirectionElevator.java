@@ -84,7 +84,7 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         } else {
             nbNothing = 0;
         }
-        if (nbNothing > 1200) {
+        if (nbNothing > 18000) {
             mustReset = true;
         }
         return lastCommand;
