@@ -123,9 +123,11 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         int bestFloorToWait = getBestFloorToWait();
         logger.info("Best floor to wait : {}", bestFloorToWait);
         if (currentFloor < bestFloorToWait) {
+            currentFloor++;
             return Command.UP;
         }
         if (currentFloor > bestFloorToWait) {
+            currentFloor--;
             return Command.DOWN;
         }
         return Command.NOTHING;
