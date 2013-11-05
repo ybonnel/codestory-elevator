@@ -47,9 +47,10 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     private DescriptiveStatistics statsOfCall = new DescriptiveStatistics(500);
 
     public void logState() {
-        logger.info("CurrentDirection : {}", currentDirection);
-        logger.info("FloorsToGo for {} : [{}]", Direction.DOWN, floorsToGo.get(Direction.DOWN));
-        logger.info("FloorsToGo for {} : [{}]", Direction.UP, floorsToGo.get(Direction.DOWN));
+        logger.info("CurrentDirection : {}, FloorsToGo for UP : {}, FloorsToGo for DOWN : {}",
+                currentDirection,
+                floorsToGo.get(Direction.DOWN),
+                floorsToGo.get(Direction.UP));
     }
 
 
@@ -100,7 +101,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         if (hasFloorsToGo()) {
             if (isOpen()) {
                 logger.info("Close doors");
-                logState();
                 return close();
             } else {
                 if (openIfSomeoneWaiting() && lastCommand != Command.CLOSE) return openIfCan();
@@ -109,7 +109,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
                 }
                 if (openIfSomeoneWaiting() && lastCommand != Command.CLOSE) return openIfCan();
                 currentFloor += currentDirection.incForCurrentFloor;
-                logState();
                 return currentDirection.commandToGo;
             }
         } else {
@@ -145,7 +144,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
             floorsToGo.get(Direction.DOWN).remove(currentFloor);
             floorsToGo.get(Direction.UP).remove(currentFloor);
             logger.info("Open doors");
-            logState();
             return true;
         }
         return false;
@@ -163,7 +161,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         if (floor != currentFloor || isClose()) {
             floorsToGo.get(Direction.valueOf(to)).add(floor);
         }
-        logState();
     }
 
     @Override
@@ -173,7 +170,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
             floorsToGo.get(Direction.DOWN).add(floorToGo);
             floorsToGo.get(Direction.UP).add(floorToGo);
         }
-        logState();
     }
 
     @Override
