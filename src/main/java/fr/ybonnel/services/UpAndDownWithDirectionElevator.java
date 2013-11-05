@@ -16,6 +16,8 @@
  */
 package fr.ybonnel.services;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,9 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     public UpAndDownWithDirectionElevator() {
         reset("START");
     }
+
+
+    private DescriptiveStatistics statsOfCall = new DescriptiveStatistics(500);
 
     public void logState() {
         logger.info("CurrentDirection : {}", currentDirection);
@@ -108,7 +113,30 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
                 return currentDirection.commandToGo;
             }
         } else {
-            return closeIfCan();
+            return goToBestFloorToWait();
+        }
+    }
+
+    private Command goToBestFloorToWait() {
+        if (isOpen()) {
+            return close();
+        }
+        int bestFloorToWait = getBestFloorToWait();
+        logger.info("Best floor to wait : {}", bestFloorToWait);
+        if (currentFloor < bestFloorToWait) {
+            return Command.UP;
+        }
+        if (currentFloor > bestFloorToWait) {
+            return Command.DOWN;
+        }
+        return Command.NOTHING;
+    }
+
+    private int getBestFloorToWait() {
+        if (statsOfCall.getN() > 0) {
+            return (int) Math.round(statsOfCall.apply(new Median()));
+        } else {
+            return 0;
         }
     }
 
@@ -123,9 +151,15 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         return false;
     }
 
+    private void addCallToMap(int floor) {
+
+        statsOfCall.addValue(floor);
+    }
+
     @Override
     public void call(int floor, String to) {
         logState();
+        addCallToMap(floor);
         if (floor != currentFloor || isClose()) {
             floorsToGo.get(Direction.valueOf(to)).add(floor);
         }
@@ -156,6 +190,7 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         if (!"START".equals(cause)) {
             mustReset = false;
         }
+        statsOfCall.clear();
         currentDirection = Direction.UP;
         floorsToGo.get(Direction.DOWN).clear();
         floorsToGo.get(Direction.UP).clear();
