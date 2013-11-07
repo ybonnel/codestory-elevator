@@ -16,8 +16,6 @@
  */
 package fr.ybonnel.services;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,22 +27,12 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
 
     private static final Logger logger = LoggerFactory.getLogger(UpAndDownWithDirectionElevator.class);
 
-    Direction currentDirection;
-
-    private boolean mustReset = true;
+    Direction currentDirection = Direction.UP;
 
     private Map<Direction, HashSet<Integer>> floorsToGo = new HashMap<Direction, HashSet<Integer>>(){{
         put(Direction.DOWN, new HashSet<Integer>());
         put(Direction.UP, new HashSet<Integer>());
     }};
-    private Command lastCommand;
-
-    public UpAndDownWithDirectionElevator() {
-        reset("START");
-    }
-
-
-    private DescriptiveStatistics statsOfCall = new DescriptiveStatistics(500);
 
     public void logState() {
         logger.info("CurrentDirection : {}, FloorsToGo for UP : {}, FloorsToGo for DOWN : {}",
@@ -77,26 +65,8 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
                 || !floorsToGo.get(Direction.DOWN).isEmpty();
     }
 
-    private int nbNothing = 0;
-
     @Override
-    public Command nextCommand() {
-        if (mustReset) {
-            return Command.CLOSE;
-        }
-        lastCommand = getNextCommand();
-        if (lastCommand == Command.NOTHING) {
-            nbNothing++;
-        } else {
-            nbNothing = 0;
-        }
-        if (nbNothing > 18000) {
-            mustReset = true;
-        }
-        return lastCommand;
-    }
-
-    private Command getNextCommand() {
+    protected Command getNextCommand() {
         logState();
         if (hasFloorsToGo()) {
             if (isOpen()) {
@@ -116,31 +86,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         }
     }
 
-    private Command goToBestFloorToWait() {
-        if (isOpen()) {
-            return close();
-        }
-        int bestFloorToWait = getBestFloorToWait();
-        logger.info("Best floor to wait : {}", bestFloorToWait);
-        if (currentFloor < bestFloorToWait) {
-            currentFloor++;
-            return Command.UP;
-        }
-        if (currentFloor > bestFloorToWait) {
-            currentFloor--;
-            return Command.DOWN;
-        }
-        return Command.NOTHING;
-    }
-
-    private int getBestFloorToWait() {
-        if (statsOfCall.getN() > 0) {
-            return (int) Math.round(statsOfCall.apply(new Median()));
-        } else {
-            return 0;
-        }
-    }
-
     private boolean openIfSomeoneWaiting() {
         if (floorsToGo.get(currentDirection).contains(currentFloor)) {
             floorsToGo.get(Direction.DOWN).remove(currentFloor);
@@ -151,15 +96,10 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         return false;
     }
 
-    private void addCallToMap(int floor) {
-
-        statsOfCall.addValue(floor);
-    }
 
     @Override
-    public void call(int floor, String to) {
+    protected void addCall(int floor, String to) {
         logState();
-        addCallToMap(floor);
         if (floor != currentFloor || isClose()) {
             floorsToGo.get(Direction.valueOf(to)).add(floor);
         }
@@ -185,10 +125,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     @Override
     public void reset(String cause) {
         super.reset(cause);
-        if (!"START".equals(cause)) {
-            mustReset = false;
-        }
-        statsOfCall.clear();
         currentDirection = Direction.UP;
         floorsToGo.get(Direction.DOWN).clear();
         floorsToGo.get(Direction.UP).clear();

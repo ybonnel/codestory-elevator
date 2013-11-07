@@ -16,10 +16,33 @@
  */
 package fr.ybonnel.services;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
+
 public abstract class CleverElevator implements Elevator {
 
-    int currentFloor;
-    State currentState;
+    int currentFloor = 0;
+    State currentState = State.CLOSE;
+    private DescriptiveStatistics statsOfCall = new DescriptiveStatistics(500);
+
+    private boolean mustReset = true;
+
+    protected Command lastCommand;
+
+    protected CleverElevator() {
+    }
+
+    @Override
+    public final Command nextCommand() {
+        if (mustReset) {
+            lastCommand = Command.CLOSE;
+        } else {
+            lastCommand = getNextCommand();
+        }
+        return lastCommand;
+    }
+
+    protected abstract Command getNextCommand();
 
     protected Command openIfCan() {
         if (isClose()) {
@@ -30,19 +53,48 @@ public abstract class CleverElevator implements Elevator {
         }
     }
 
-    protected Command closeIfCan() {
-        if (isOpen()) {
-            currentState = State.CLOSE;
-            return Command.CLOSE;
+    @Override
+    public final void call(int floor, String to) {
+        addCallToMap(floor);
+        addCall(floor, to);
+    }
+
+    protected abstract void addCall(int floor, String to);
+
+    private void addCallToMap(int floor) {
+        statsOfCall.addValue(floor);
+    }
+
+    private int getBestFloorToWait() {
+        if (statsOfCall.getN() > 0) {
+            return (int) Math.round(statsOfCall.apply(new Median()));
         } else {
-            return Command.NOTHING;
+            return 0;
         }
+    }
+
+    protected Command goToBestFloorToWait() {
+        if (isOpen()) {
+            return close();
+        }
+        int bestFloorToWait = getBestFloorToWait();
+        if (currentFloor < bestFloorToWait) {
+            currentFloor++;
+            return Command.UP;
+        }
+        if (currentFloor > bestFloorToWait) {
+            currentFloor--;
+            return Command.DOWN;
+        }
+        return Command.NOTHING;
     }
 
     @Override
     public void reset(String cause) {
+        mustReset = false;
         currentFloor = 0;
         currentState = State.CLOSE;
+        statsOfCall.clear();
     }
 
     protected boolean isOpen() {

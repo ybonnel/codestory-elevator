@@ -16,20 +16,34 @@
  */
 package fr.ybonnel.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 
-public class NearestElevator extends CleverElevator {
+public class FastDeliverElevator extends CleverElevator {
+
+    private static final Logger logger = LoggerFactory.getLogger(FastDeliverElevator.class);
 
 
     private HashSet<Integer> floorsToGo = new HashSet<>();
+    private HashSet<Integer> floorsHasCalled = new HashSet<>();
 
-    public NearestElevator() {
+    public FastDeliverElevator() {
     }
 
-    private int getNearestFloor() {
+
+
+    public void logState() {
+        logger.info("CurrentFloor : {}", currentFloor);
+        logger.info("FloorsToGo : {}", floorsToGo);
+        logger.info("FllorsHasCalled : {}", floorsHasCalled);
+    }
+
+    private int getNearestFloorFromOneStack(HashSet<Integer> floors) {
         int minDiff = 999;
         int minFloor = 0;
-        for (int floor : floorsToGo) {
+        for (int floor : floors) {
             if (Math.abs(floor - currentFloor) < minDiff) {
                 minFloor = floor;
                 minDiff = Math.abs(floor - currentFloor);
@@ -38,21 +52,30 @@ public class NearestElevator extends CleverElevator {
         return minFloor;
     }
 
+    private int getNearestFloor() {
+        if (!floorsToGo.isEmpty()) {
+            return getNearestFloorFromOneStack(floorsToGo);
+        }
+        return getNearestFloorFromOneStack(floorsHasCalled);
+    }
+
     @Override
     protected Command getNextCommand() {
-        if (floorsToGo.isEmpty()) {
+        if (floorsToGo.isEmpty() && floorsHasCalled.isEmpty()) {
             return goToBestFloorToWait();
         } else {
             if (isOpen()) {
                 return close();
             } else {
-                if (floorsToGo.contains(currentFloor)) {
+                int floorToGo = getNearestFloor();
+                logger.info("Floor to go : {}", floorToGo);
+                logState();
+
+                if (floorToGo == currentFloor) {
                     floorsToGo.remove(currentFloor);
+                    floorsHasCalled.remove(currentFloor);
                     return openIfCan();
                 }
-
-                int floorToGo = getNearestFloor();
-
                 Direction direction = floorToGo < currentFloor ? Direction.DOWN : Direction.UP;
 
                 currentFloor += direction.incForCurrentFloor;
@@ -63,7 +86,7 @@ public class NearestElevator extends CleverElevator {
 
     @Override
     public void addCall(int floor, String to) {
-        floorsToGo.add(floor);
+        floorsHasCalled.add(floor);
     }
 
     @Override
@@ -83,5 +106,6 @@ public class NearestElevator extends CleverElevator {
     public void reset(String cause) {
         super.reset(cause);
         floorsToGo.clear();
+        floorsHasCalled.clear();
     }
 }

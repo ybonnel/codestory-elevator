@@ -2,9 +2,9 @@ package fr.ybonnel;
 
 import fr.ybonnel.services.Elevator;
 import fr.ybonnel.services.ElevatorService;
+import fr.ybonnel.services.FastDeliverElevator;
 import fr.ybonnel.services.NearestElevator;
 import fr.ybonnel.services.Omnibus;
-import fr.ybonnel.services.UpAndDownElevator;
 import fr.ybonnel.services.UpAndDownWithDirectionElevator;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class Main {
 
     public final static Elevator elevators[] = {
             new Omnibus(),
-            new UpAndDownElevator(),
+            new FastDeliverElevator(),
             new NearestElevator(),
             new UpAndDownWithDirectionElevator()
     };
@@ -39,7 +39,6 @@ public class Main {
         for (Elevator elevator : elevators) {
             new ElevatorService("/" + elevator.getClass().getSimpleName(), elevator).registerRoutes();
         }
-        new ElevatorService("", new UpAndDownWithDirectionElevator()).registerRoutes();
         new ElevatorService("/elevator", new UpAndDownWithDirectionElevator()).registerRoutes();
 
         // Start the server.
