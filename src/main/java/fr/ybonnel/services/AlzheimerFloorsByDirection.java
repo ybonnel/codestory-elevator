@@ -23,8 +23,8 @@ import java.util.Set;
 
 public class AlzheimerFloorsByDirection implements IFloorsByDirection {
 
-    private final static int MAX_WAIT = 20;
-    private final static int MAX_WAIT_FOR_GO = 10;
+    private final static int MAX_WAIT = 40;
+    private final static int MAX_WAIT_FOR_GO = 20;
 
     private Map<Direction, Map<Integer, Integer>> floorsToGo = new HashMap<Direction, Map<Integer, Integer>>(){{
         put(Direction.DOWN, new HashMap<Integer, Integer>());
