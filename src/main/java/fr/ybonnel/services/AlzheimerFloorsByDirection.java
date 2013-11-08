@@ -31,6 +31,8 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
         put(Direction.UP, new HashMap<Integer, Integer>());
     }};
 
+    private Map<Integer, Integer> lastWaitTimeBeforeOpen = new HashMap<>();
+
     @Override
     public String toString() {
         return floorsToGo.toString();
@@ -64,7 +66,8 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
 
     public void addFloorToGo(int floor, int currentFloor) {
         int diff = Math.abs(currentFloor - floor);
-        int wait = MAX_WAIT_FOR_GO + diff;
+        Integer lastWaitTime = lastWaitTimeBeforeOpen.containsKey(currentFloor) ? lastWaitTimeBeforeOpen.get(currentFloor) : 0;
+        int wait = MAX_WAIT_FOR_GO + diff - ((MAX_WAIT - lastWaitTime) / 2);
         for (Direction direction : Direction.values()) {
             if (!floorsToGo.get(direction).containsKey(floor)
                     || floorsToGo.get(direction).get(floor) < wait) {
@@ -78,8 +81,9 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     }
 
     public void willOpenDoorsOnFloor(int floor) {
-        floorsToGo.get(Direction.DOWN).remove(floor);
-        floorsToGo.get(Direction.UP).remove(floor);
+        int waitTimeDown = floorsToGo.get(Direction.DOWN).remove(floor);
+        int waitTimeUp = floorsToGo.get(Direction.UP).remove(floor);
+        lastWaitTimeBeforeOpen.put(floor, Math.max(waitTimeDown, waitTimeUp));
     }
 
     public boolean isEmpty() {
