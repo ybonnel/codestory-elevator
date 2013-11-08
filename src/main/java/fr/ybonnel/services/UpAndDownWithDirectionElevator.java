@@ -19,65 +19,57 @@ package fr.ybonnel.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 public class UpAndDownWithDirectionElevator extends CleverElevator {
 
     private static final Logger logger = LoggerFactory.getLogger(UpAndDownWithDirectionElevator.class);
 
     Direction currentDirection = Direction.UP;
 
-    private Map<Direction, HashSet<Integer>> floorsToGo = new HashMap<Direction, HashSet<Integer>>(){{
-        put(Direction.DOWN, new HashSet<Integer>());
-        put(Direction.UP, new HashSet<Integer>());
-    }};
+    private IFloorsByDirection floorsByDirection;
+
+    public UpAndDownWithDirectionElevator() {
+        floorsByDirection = new FloorsByDirection();
+    }
+
+    protected UpAndDownWithDirectionElevator(IFloorsByDirection floorsByDirection) {
+        this.floorsByDirection = floorsByDirection;
+    }
 
     public void logState() {
-        logger.info("CurrentDirection : {}, FloorsToGo for UP : {}, FloorsToGo for DOWN : {}",
+        logger.info("CurrentDirection : {}, FloorsByDirection : {}",
                 currentDirection,
-                floorsToGo.get(Direction.DOWN),
-                floorsToGo.get(Direction.UP));
+                floorsByDirection);
     }
 
 
-
-    public boolean containsFloorForCurrentDirection() {
-        for (int floor : floorsToGo.get(currentDirection)) {
-            if (isFloorGoodForCurrentDirection(floor)) return true;
-        }
-        for (int floor : floorsToGo.get(currentDirection.getOtherDirection())) {
-            if (isFloorGoodForCurrentDirection(floor)) return true;
-        }
-        return false;
-    }
-
-    private boolean isFloorGoodForCurrentDirection(int floor) {
-        return currentDirection == Direction.UP
-                && floor > currentFloor
-                || currentDirection == Direction.DOWN
-                && floor < currentFloor;
-    }
 
     public boolean hasFloorsToGo() {
-        return !floorsToGo.get(Direction.UP).isEmpty()
-                || !floorsToGo.get(Direction.DOWN).isEmpty();
+        return !floorsByDirection.isEmpty();
     }
 
     @Override
     protected Command getNextCommand() {
         logState();
+        floorsByDirection.nextCommandCalled();
         if (hasFloorsToGo()) {
             if (isOpen()) {
                 logger.info("Close doors");
                 return close();
             } else {
-                if (openIfSomeoneWaiting() && lastCommand != Command.CLOSE) return openIfCan();
-                if (!containsFloorForCurrentDirection()) {
+                if (floorsByDirection.mustOpenFloorForThisDirection(currentFloor, currentDirection)
+                        && lastCommand != Command.CLOSE) {
+                    return openIfCan();
+                }
+
+                if (!floorsByDirection.containsFloorForCurrentDirection(currentFloor, currentDirection)) {
                     currentDirection = currentDirection.getOtherDirection();
                 }
-                if (openIfSomeoneWaiting() && lastCommand != Command.CLOSE) return openIfCan();
+
+                if (floorsByDirection.mustOpenFloorForThisDirection(currentFloor, currentDirection)
+                        && lastCommand != Command.CLOSE) {
+                    return openIfCan();
+                }
+
                 currentFloor += currentDirection.incForCurrentFloor;
                 return currentDirection.commandToGo;
             }
@@ -86,14 +78,13 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         }
     }
 
-    private boolean openIfSomeoneWaiting() {
-        if (floorsToGo.get(currentDirection).contains(currentFloor)) {
-            floorsToGo.get(Direction.DOWN).remove(currentFloor);
-            floorsToGo.get(Direction.UP).remove(currentFloor);
-            logger.info("Open doors");
-            return true;
+    @Override
+    protected Command openIfCan() {
+        Command command = super.openIfCan();
+        if (command == Command.OPEN) {
+            floorsByDirection.willOpenDoorsOnFloor(currentFloor);
         }
-        return false;
+        return command;
     }
 
 
@@ -101,7 +92,7 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     protected void addCall(int floor, String to) {
         logState();
         if (floor != currentFloor || isClose()) {
-            floorsToGo.get(Direction.valueOf(to)).add(floor);
+            floorsByDirection.addFloorForDirection(floor, Direction.valueOf(to));
         }
     }
 
@@ -109,8 +100,7 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     public void go(int floorToGo) {
         logState();
         if (floorToGo != currentFloor || isClose()) {
-            floorsToGo.get(Direction.DOWN).add(floorToGo);
-            floorsToGo.get(Direction.UP).add(floorToGo);
+            floorsByDirection.addFloorToGo(floorToGo);
         }
     }
 
@@ -126,7 +116,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     public void reset(String cause) {
         super.reset(cause);
         currentDirection = Direction.UP;
-        floorsToGo.get(Direction.DOWN).clear();
-        floorsToGo.get(Direction.UP).clear();
+        floorsByDirection.clear();
     }
 }

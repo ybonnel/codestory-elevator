@@ -1,5 +1,6 @@
 package fr.ybonnel;
 
+import fr.ybonnel.services.AlzheimerElevator;
 import fr.ybonnel.services.Elevator;
 import fr.ybonnel.services.ElevatorService;
 import fr.ybonnel.services.FastDeliverElevator;
@@ -20,7 +21,8 @@ public class Main {
             new Omnibus(),
             new FastDeliverElevator(),
             new NearestElevator(),
-            new UpAndDownWithDirectionElevator()
+            new UpAndDownWithDirectionElevator(),
+            new AlzheimerElevator()
     };
 
 
