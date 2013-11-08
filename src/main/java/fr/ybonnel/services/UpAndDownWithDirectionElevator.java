@@ -21,17 +21,19 @@ import org.slf4j.LoggerFactory;
 
 public class UpAndDownWithDirectionElevator extends CleverElevator {
 
-    private static final Logger logger = LoggerFactory.getLogger(UpAndDownWithDirectionElevator.class);
+    private final Logger logger;
 
     Direction currentDirection = Direction.UP;
 
     private IFloorsByDirection floorsByDirection;
 
     public UpAndDownWithDirectionElevator() {
+        logger = LoggerFactory.getLogger(getClass());
         floorsByDirection = new FloorsByDirection();
     }
 
     protected UpAndDownWithDirectionElevator(IFloorsByDirection floorsByDirection) {
+        logger = LoggerFactory.getLogger(getClass());
         this.floorsByDirection = floorsByDirection;
     }
 
