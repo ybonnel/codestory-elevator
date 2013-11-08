@@ -24,6 +24,8 @@ import fr.ybonnel.simpleweb4j.handlers.RouteParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 import static fr.ybonnel.simpleweb4j.SimpleWeb4j.get;
 
 public class ElevatorService {
@@ -43,11 +45,13 @@ public class ElevatorService {
         return new Route<Void, Command>(route + "/nextCommand", Void.class, ContentType.PLAIN_TEXT) {
             @Override
             public Response<Command> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                long startTime = System.nanoTime();
                 Command nextCommand;
                 synchronized (elevator) {
                     nextCommand = elevator.nextCommand();
                 }
-                logger.info("Call of nextCommand, response : {}", nextCommand);
+                long endTime = System.nanoTime();
+                logger.info("Call of nextCommand, response : {}, time({}us)", nextCommand, TimeUnit.NANOSECONDS.toMicros(endTime - startTime));
                 return new Response<>(nextCommand);
             }
         };
@@ -57,10 +61,12 @@ public class ElevatorService {
         return new Route<Void, Void>(route + "/reset", Void.class) {
             @Override
             public Response<Void> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                long startTime = System.nanoTime();
                 synchronized (elevator) {
-                    logger.info("Call of reset({})", routeParams.getParam("cause"));
                     elevator.reset(routeParams.getParam("cause"));
                 }
+                long endTime = System.nanoTime();
+                logger.info("Call of reset({}) : time({}us)", routeParams.getParam("cause"), TimeUnit.NANOSECONDS.toMicros(endTime - startTime));
                 return new Response<>(null);
             }
         };
@@ -70,11 +76,13 @@ public class ElevatorService {
         return new Route<Void, Void>(route + "/call", Void.class) {
             @Override
             public Response<Void> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                long startTime = System.nanoTime();
                 synchronized (elevator) {
-                    logger.info("Call of call({},{})", routeParams.getParam("atFloor"), routeParams.getParam("to"));
                     elevator.call(Integer.parseInt(routeParams.getParam("atFloor")),
                             routeParams.getParam("to"));
                 }
+                long endTime = System.nanoTime();
+                logger.info("Call of call({},{}) : time({}us)", routeParams.getParam("atFloor"), routeParams.getParam("to"), TimeUnit.NANOSECONDS.toMicros(endTime - startTime));
                 return new Response<>(null);
             }
         };
@@ -84,10 +92,12 @@ public class ElevatorService {
         return new Route<Void, Void>(route + "/go", Void.class) {
             @Override
             public Response<Void> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                long startTime = System.nanoTime();
                 synchronized (elevator) {
-                    logger.info("Call of go({})", routeParams.getParam("floorToGo"));
                     elevator.go(Integer.parseInt(routeParams.getParam("floorToGo")));
                 }
+                long endTime = System.nanoTime();
+                logger.info("Call of go({}) : time({}us)", routeParams.getParam("floorToGo"), TimeUnit.NANOSECONDS.toMicros(endTime - startTime));
                 return new Response<>(null);
             }
         };
@@ -97,10 +107,12 @@ public class ElevatorService {
         return new Route<Void, Void>(route + "/userHasEntered", Void.class) {
             @Override
             public Response<Void> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                long startTime = System.nanoTime();
                 synchronized (elevator) {
-                    logger.info("Call of userHasEntered");
                     elevator.userHasEntered();
                 }
+                long endTime = System.nanoTime();
+                logger.info("Call of userHasEntered : time({}us)", TimeUnit.NANOSECONDS.toMicros(endTime - startTime));
                 return new Response<>(null);
             }
         };
@@ -110,10 +122,12 @@ public class ElevatorService {
         return new Route<Void, Void>(route + "/userHasExited", Void.class) {
             @Override
             public Response<Void> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                long startTime = System.nanoTime();
                 synchronized (elevator) {
-                    logger.info("Call of userHasExited");
                     elevator.userHasExited();
                 }
+                long endTime = System.nanoTime();
+                logger.info("Call of userHasExited: time({}us)", TimeUnit.NANOSECONDS.toMicros(endTime - startTime));
                 return new Response<>(null);
             }
         };

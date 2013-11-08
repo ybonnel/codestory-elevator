@@ -35,9 +35,7 @@ public class FastDeliverElevator extends CleverElevator {
 
 
     public void logState() {
-        logger.info("CurrentFloor : {}", currentFloor);
-        logger.info("FloorsToGo : {}", floorsToGo);
-        logger.info("FllorsHasCalled : {}", floorsHasCalled);
+        logger.info("CurrentFloor : {}, FloorsToGo : {}, FloorsHasCalled : {}", currentFloor, floorsToGo, floorsHasCalled);
     }
 
     private int getNearestFloorFromOneStack(HashSet<Integer> floors) {
@@ -68,7 +66,6 @@ public class FastDeliverElevator extends CleverElevator {
                 return close();
             } else {
                 int floorToGo = getNearestFloor();
-                logger.info("Floor to go : {}", floorToGo);
                 logState();
 
                 if (floorToGo == currentFloor) {
