@@ -75,7 +75,7 @@ public class FloorsByDirection  implements IFloorsByDirection {
     public void nextCommandCalled() {
     }
 
-    public void addFloorToGo(int floor) {
+    public void addFloorToGo(int floor, int currentFloor) {
         floorsToGo.get(Direction.UP).add(floor);
         floorsToGo.get(Direction.DOWN).add(floor);
     }

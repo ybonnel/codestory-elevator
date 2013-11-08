@@ -62,9 +62,15 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
         floorsToGo.get(direction).put(floor, MAX_WAIT);
     }
 
-    public void addFloorToGo(int floor) {
-        floorsToGo.get(Direction.UP).put(floor, MAX_WAIT_FOR_GO);
-        floorsToGo.get(Direction.DOWN).put(floor, MAX_WAIT_FOR_GO);
+    public void addFloorToGo(int floor, int currentFloor) {
+        int diff = Math.abs(currentFloor - floor);
+        int wait = MAX_WAIT_FOR_GO + diff;
+        for (Direction direction : Direction.values()) {
+            if (!floorsToGo.get(direction).containsKey(floor)
+                    || floorsToGo.get(direction).get(floor) < wait) {
+                floorsToGo.get(direction).put(floor, wait);
+            }
+        }
     }
 
     public boolean mustOpenFloorForThisDirection(int currentFloor, Direction currentDirection) {

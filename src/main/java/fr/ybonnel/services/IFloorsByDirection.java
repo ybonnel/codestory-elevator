@@ -31,5 +31,5 @@ public interface IFloorsByDirection {
     public boolean isEmpty();
 
     public void nextCommandCalled();
-    public void addFloorToGo(int floor);
+    public void addFloorToGo(int floor, int currentFloor);
 }
