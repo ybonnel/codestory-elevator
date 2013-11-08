@@ -92,7 +92,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
 
     @Override
     protected void addCall(int floor, String to) {
-        logState();
         if (floor != currentFloor || isClose()) {
             floorsByDirection.addFloorForDirection(floor, Direction.valueOf(to));
         }
@@ -100,7 +99,6 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
 
     @Override
     public void go(int floorToGo) {
-        logState();
         if (floorToGo != currentFloor || isClose()) {
             floorsByDirection.addFloorToGo(floorToGo, currentFloor);
         }

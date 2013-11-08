@@ -26,7 +26,7 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     private final static int MAX_WAIT = 40;
     private final static int MAX_WAIT_FOR_GO = 20;
 
-    private Map<Direction, Map<Integer, Integer>> floorsToGo = new HashMap<Direction, Map<Integer, Integer>>(){{
+    private Map<Direction, Map<Integer, Integer>> floorsToGo = new HashMap<Direction, Map<Integer, Integer>>() {{
         put(Direction.DOWN, new HashMap<Integer, Integer>());
         put(Direction.UP, new HashMap<Integer, Integer>());
     }};
@@ -81,9 +81,19 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     }
 
     public void willOpenDoorsOnFloor(int floor) {
-        int waitTimeDown = floorsToGo.get(Direction.DOWN).remove(floor);
-        int waitTimeUp = floorsToGo.get(Direction.UP).remove(floor);
-        lastWaitTimeBeforeOpen.put(floor, Math.max(waitTimeDown, waitTimeUp));
+        Integer waitTimeDown = floorsToGo.get(Direction.DOWN).remove(floor);
+        Integer waitTimeUp = floorsToGo.get(Direction.UP).remove(floor);
+        int waitTime = MAX_WAIT;
+        if (waitTimeDown != null && waitTimeUp != null) {
+            waitTime = Math.max(waitTimeDown, waitTimeUp);
+        }
+        else if (waitTimeDown != null) {
+            waitTime = waitTimeDown;
+        }
+        else if (waitTimeUp != null) {
+            waitTime = waitTimeUp;
+        }
+        lastWaitTimeBeforeOpen.put(floor, waitTime);
     }
 
     public boolean isEmpty() {
@@ -95,7 +105,7 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
         for (Direction direction : Direction.values()) {
             Set<Integer> floorsToRemove = new HashSet<>();
             for (Map.Entry<Integer, Integer> floorWithCounter : floorsToGo.get(direction).entrySet()) {
-                floorWithCounter.setValue(floorWithCounter.getValue()-1);
+                floorWithCounter.setValue(floorWithCounter.getValue() - 1);
                 if (floorWithCounter.getValue() == 0) {
                     floorsToRemove.add(floorWithCounter.getKey());
                 }

@@ -18,10 +18,10 @@ import static fr.ybonnel.simpleweb4j.SimpleWeb4j.*;
 public class Main {
 
     public final static Elevator elevators[] = {
-            new Omnibus(),
-            new FastDeliverElevator(),
-            new NearestElevator(),
-            new UpAndDownWithDirectionElevator(),
+            //new Omnibus(),
+            //new FastDeliverElevator(),
+            //new NearestElevator(),
+            //new UpAndDownWithDirectionElevator(),
             new AlzheimerElevator()
     };
 
