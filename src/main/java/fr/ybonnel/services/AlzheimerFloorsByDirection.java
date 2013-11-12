@@ -23,8 +23,34 @@ import java.util.Set;
 
 public class AlzheimerFloorsByDirection implements IFloorsByDirection {
 
-    private final static int MAX_WAIT = 40;
-    private final static int MAX_WAIT_FOR_GO = 20;
+    private Integer lowerFloor;
+    private Integer higherFloor;
+
+    public int getLowerFloor() {
+        if (lowerFloor != null) {
+            return lowerFloor;
+        }
+        return 0;
+    }
+
+    public int getHigherFloor() {
+        if (higherFloor != null) {
+            return higherFloor;
+        }
+        return 19;
+    }
+
+    private int getNbMaxWait() {
+        return getHigherFloor() - getLowerFloor() + 1;
+    }
+
+    public void setLowerFloor(Integer lowerFloor) {
+        this.lowerFloor = lowerFloor;
+    }
+
+    public void setHigherFloor(Integer higherFloor) {
+        this.higherFloor = higherFloor;
+    }
 
     private Map<Direction, Map<Integer, Integer>> floorsToGo = new HashMap<Direction, Map<Integer, Integer>>() {{
         put(Direction.DOWN, new HashMap<Integer, Integer>());
@@ -61,13 +87,13 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     }
 
     public void addFloorForDirection(int floor, Direction direction) {
-        floorsToGo.get(direction).put(floor, MAX_WAIT);
+        floorsToGo.get(direction).put(floor, getNbMaxWait()*2);
     }
 
     public void addFloorToGo(int floor, int currentFloor) {
         int diff = Math.abs(currentFloor - floor);
         Integer lastWaitTime = lastWaitTimeBeforeOpen.containsKey(currentFloor) ? lastWaitTimeBeforeOpen.get(currentFloor) : 0;
-        int wait = MAX_WAIT_FOR_GO + diff - ((MAX_WAIT - lastWaitTime) / 2);
+        int wait = getNbMaxWait() + diff - ((getNbMaxWait()*2 - lastWaitTime) / 2);
         for (Direction direction : Direction.values()) {
             if (!floorsToGo.get(direction).containsKey(floor)
                     || floorsToGo.get(direction).get(floor) < wait) {
@@ -83,7 +109,7 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     public void willOpenDoorsOnFloor(int floor) {
         Integer waitTimeDown = floorsToGo.get(Direction.DOWN).remove(floor);
         Integer waitTimeUp = floorsToGo.get(Direction.UP).remove(floor);
-        int waitTime = MAX_WAIT;
+        int waitTime = getNbMaxWait()*2;
         if (waitTimeDown != null && waitTimeUp != null) {
             waitTime = Math.max(waitTimeDown, waitTimeUp);
         }
@@ -101,12 +127,12 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     }
 
     @Override
-    public void nextCommandCalled() {
+    public void nextCommandCalled(int currentFloor) {
         for (Direction direction : Direction.values()) {
             Set<Integer> floorsToRemove = new HashSet<>();
             for (Map.Entry<Integer, Integer> floorWithCounter : floorsToGo.get(direction).entrySet()) {
                 floorWithCounter.setValue(floorWithCounter.getValue() - 1);
-                if (floorWithCounter.getValue() == 0) {
+                if (floorWithCounter.getValue() <= Math.abs(currentFloor - floorWithCounter.getKey())) {
                     floorsToRemove.add(floorWithCounter.getKey());
                 }
             }

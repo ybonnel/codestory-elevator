@@ -100,8 +100,8 @@ public class FastDeliverElevator extends CleverElevator {
     }
 
     @Override
-    public void reset(String cause) {
-        super.reset(cause);
+    public void reset(String cause, Integer lowerFloor, Integer higherFloor) {
+        super.reset(cause, lowerFloor, higherFloor);
         floorsToGo.clear();
         floorsHasCalled.clear();
     }

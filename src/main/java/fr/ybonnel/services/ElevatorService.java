@@ -63,7 +63,9 @@ public class ElevatorService {
             public Response<Void> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
                 long startTime = System.nanoTime();
                 synchronized (elevator) {
-                    elevator.reset(routeParams.getParam("cause"));
+                    Integer lowerFloor = routeParams.getParam("lowerFloor") == null ? null : Integer.parseInt(routeParams.getParam("lowerFloor"));
+                    Integer higherFloor = routeParams.getParam("higherFloor") == null ? null : Integer.parseInt(routeParams.getParam("higherFloor"));
+                    elevator.reset(routeParams.getParam("cause"), lowerFloor, higherFloor);
                 }
                 long endTime = System.nanoTime();
                 logger.info("Call of reset({}) : time({}us)", routeParams.getParam("cause"), TimeUnit.NANOSECONDS.toMicros(endTime - startTime));

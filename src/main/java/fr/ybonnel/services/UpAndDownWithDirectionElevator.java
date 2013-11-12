@@ -52,7 +52,7 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     @Override
     protected Command getNextCommand() {
         logState();
-        floorsByDirection.nextCommandCalled();
+        floorsByDirection.nextCommandCalled(currentFloor);
         if (hasFloorsToGo()) {
             if (isOpen()) {
                 logger.info("Close doors");
@@ -113,9 +113,11 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     }
 
     @Override
-    public void reset(String cause) {
-        super.reset(cause);
+    public void reset(String cause, Integer lowerFloor, Integer higherFloor) {
+        super.reset(cause, lowerFloor, higherFloor);
         currentDirection = Direction.UP;
         floorsByDirection.clear();
+        floorsByDirection.setLowerFloor(lowerFloor);
+        floorsByDirection.setHigherFloor(higherFloor);
     }
 }

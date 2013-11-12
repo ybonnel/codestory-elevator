@@ -25,6 +25,23 @@ public abstract class CleverElevator implements Elevator {
     State currentState = State.CLOSE;
     private DescriptiveStatistics statsOfCall = new DescriptiveStatistics(500);
 
+    private Integer lowerFloor;
+    private Integer higherFloor;
+
+    public int getLowerFloor() {
+        if (lowerFloor != null) {
+            return lowerFloor;
+        }
+        return 0;
+    }
+
+    public Integer getHigherFloor() {
+        if (higherFloor != null) {
+            return higherFloor;
+        }
+        return 19;
+    }
+
     private boolean mustReset = true;
 
     protected Command lastCommand;
@@ -90,11 +107,13 @@ public abstract class CleverElevator implements Elevator {
     }
 
     @Override
-    public void reset(String cause) {
+    public void reset(String cause, Integer lowerFloor, Integer higherFloor) {
         mustReset = false;
         currentFloor = 0;
         currentState = State.CLOSE;
         statsOfCall.clear();
+        this.lowerFloor = lowerFloor;
+        this.higherFloor = higherFloor;
     }
 
     protected boolean isOpen() {

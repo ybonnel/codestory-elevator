@@ -23,5 +23,5 @@ public interface Elevator {
     void go(int floorToGo);
     void userHasEntered();
     void userHasExited();
-    void reset(String cause);
+    void reset(String cause, Integer lowerFloor, Integer higherFloor);
 }

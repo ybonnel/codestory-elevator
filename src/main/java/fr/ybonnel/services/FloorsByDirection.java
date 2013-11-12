@@ -72,11 +72,19 @@ public class FloorsByDirection  implements IFloorsByDirection {
     }
 
     @Override
-    public void nextCommandCalled() {
+    public void nextCommandCalled(int currentFloor) {
     }
 
     public void addFloorToGo(int floor, int currentFloor) {
         floorsToGo.get(Direction.UP).add(floor);
         floorsToGo.get(Direction.DOWN).add(floor);
+    }
+
+    @Override
+    public void setLowerFloor(Integer lowerFloor) {
+    }
+
+    @Override
+    public void setHigherFloor(Integer higherFloor) {
     }
 }

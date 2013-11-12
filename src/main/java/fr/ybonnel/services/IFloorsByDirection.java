@@ -30,6 +30,8 @@ public interface IFloorsByDirection {
 
     public boolean isEmpty();
 
-    public void nextCommandCalled();
+    public void nextCommandCalled(int currentFloor);
     public void addFloorToGo(int floor, int currentFloor);
+    public void setLowerFloor(Integer lowerFloor);
+    public void setHigherFloor(Integer higherFloor);
 }
