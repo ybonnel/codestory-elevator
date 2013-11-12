@@ -23,39 +23,22 @@ import java.util.Set;
 
 public class AlzheimerFloorsByDirection implements IFloorsByDirection {
 
-    private Integer lowerFloor;
-    private Integer higherFloor;
-
-    public int getLowerFloor() {
-        if (lowerFloor != null) {
-            return lowerFloor;
-        }
-        return 0;
-    }
-
-    public int getHigherFloor() {
-        if (higherFloor != null) {
-            return higherFloor;
-        }
-        return 19;
-    }
-
     private int getNbMaxWait() {
-        return getHigherFloor() - getLowerFloor() + 1;
+        return 20;
     }
 
     public void setLowerFloor(Integer lowerFloor) {
-        this.lowerFloor = lowerFloor;
     }
 
     public void setHigherFloor(Integer higherFloor) {
-        this.higherFloor = higherFloor;
     }
 
-    private Map<Direction, Map<Integer, Integer>> floorsToGo = new HashMap<Direction, Map<Integer, Integer>>() {{
+    private Map<Direction, Map<Integer, Integer>> floorsHasCalled = new HashMap<Direction, Map<Integer, Integer>>() {{
         put(Direction.DOWN, new HashMap<Integer, Integer>());
         put(Direction.UP, new HashMap<Integer, Integer>());
     }};
+
+    private Map<Integer, Integer> floorsToGo = new HashMap<>();
 
     private Map<Integer, Integer> lastWaitTimeBeforeOpen = new HashMap<>();
 
@@ -65,15 +48,21 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     }
 
     public void clear() {
-        floorsToGo.get(Direction.DOWN).clear();
-        floorsToGo.get(Direction.UP).clear();
+        floorsHasCalled.get(Direction.DOWN).clear();
+        floorsHasCalled.get(Direction.UP).clear();
+        floorsToGo.clear();
     }
 
-    public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection) {
-        for (int floor : floorsToGo.get(currentDirection).keySet()) {
-            if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
+    public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize) {
+        if (peopleInElevator < cabinSize) {
+            for (int floor : floorsHasCalled.get(currentDirection).keySet()) {
+                if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
+            }
+            for (int floor : floorsHasCalled.get(currentDirection.getOtherDirection()).keySet()) {
+                if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
+            }
         }
-        for (int floor : floorsToGo.get(currentDirection.getOtherDirection()).keySet()) {
+        for (int floor : floorsToGo.keySet()) {
             if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
         }
         return false;
@@ -87,59 +76,70 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     }
 
     public void addFloorForDirection(int floor, Direction direction) {
-        floorsToGo.get(direction).put(floor, getNbMaxWait()*2);
+        floorsHasCalled.get(direction).put(floor, getNbMaxWait() * 2);
     }
 
     public void addFloorToGo(int floor, int currentFloor) {
         int diff = Math.abs(currentFloor - floor);
         Integer lastWaitTime = lastWaitTimeBeforeOpen.containsKey(currentFloor) ? lastWaitTimeBeforeOpen.get(currentFloor) : 0;
-        int wait = getNbMaxWait() + diff - ((getNbMaxWait()*2 - lastWaitTime) / 2);
-        for (Direction direction : Direction.values()) {
-            if (!floorsToGo.get(direction).containsKey(floor)
-                    || floorsToGo.get(direction).get(floor) < wait) {
-                floorsToGo.get(direction).put(floor, wait);
-            }
+        int wait = getNbMaxWait() + diff - ((getNbMaxWait() * 2 - lastWaitTime) / 2);
+        if (!floorsToGo.containsKey(floor)
+                || floorsToGo.get(floor) < wait) {
+            floorsToGo.put(floor, wait);
         }
     }
 
-    public boolean mustOpenFloorForThisDirection(int currentFloor, Direction currentDirection) {
-        return floorsToGo.get(currentDirection).containsKey(currentFloor);
+    public boolean mustOpenFloorForThisDirection(int currentFloor, Direction currentDirection,
+                                                 int peopleInElevator, int cabinSize) {
+        return (floorsToGo.containsKey(currentFloor)
+                || (floorsHasCalled.get(currentDirection).containsKey(currentFloor)
+                    && peopleInElevator < cabinSize));
     }
 
     public void willOpenDoorsOnFloor(int floor) {
-        Integer waitTimeDown = floorsToGo.get(Direction.DOWN).remove(floor);
-        Integer waitTimeUp = floorsToGo.get(Direction.UP).remove(floor);
-        int waitTime = getNbMaxWait()*2;
+        Integer waitTimeDown = floorsHasCalled.get(Direction.DOWN).remove(floor);
+        Integer waitTimeUp = floorsHasCalled.get(Direction.UP).remove(floor);
+        int waitTime = getNbMaxWait() * 2;
         if (waitTimeDown != null && waitTimeUp != null) {
             waitTime = Math.max(waitTimeDown, waitTimeUp);
-        }
-        else if (waitTimeDown != null) {
+        } else if (waitTimeDown != null) {
             waitTime = waitTimeDown;
-        }
-        else if (waitTimeUp != null) {
+        } else if (waitTimeUp != null) {
             waitTime = waitTimeUp;
         }
         lastWaitTimeBeforeOpen.put(floor, waitTime);
     }
 
     public boolean isEmpty() {
-        return floorsToGo.get(Direction.DOWN).isEmpty() && floorsToGo.get(Direction.UP).isEmpty();
+        return floorsHasCalled.get(Direction.DOWN).isEmpty() && floorsHasCalled.get(Direction.UP).isEmpty()
+                && floorsToGo.isEmpty();
     }
 
     @Override
     public void nextCommandCalled(int currentFloor) {
         for (Direction direction : Direction.values()) {
             Set<Integer> floorsToRemove = new HashSet<>();
-            for (Map.Entry<Integer, Integer> floorWithCounter : floorsToGo.get(direction).entrySet()) {
+            for (Map.Entry<Integer, Integer> floorWithCounter : floorsHasCalled.get(direction).entrySet()) {
                 floorWithCounter.setValue(floorWithCounter.getValue() - 1);
                 if (floorWithCounter.getValue() <= Math.abs(currentFloor - floorWithCounter.getKey())) {
                     floorsToRemove.add(floorWithCounter.getKey());
                 }
             }
             for (int floor : floorsToRemove) {
-                floorsToGo.get(direction).remove(floor);
+                floorsHasCalled.get(direction).remove(floor);
             }
         }
+        Set<Integer> floorsToRemove = new HashSet<>();
+        for (Map.Entry<Integer, Integer> floorWithCounter : floorsToGo.entrySet()) {
+            floorWithCounter.setValue(floorWithCounter.getValue() - 1);
+            if (floorWithCounter.getValue() <= Math.abs(currentFloor - floorWithCounter.getKey())) {
+                floorsToRemove.add(floorWithCounter.getKey());
+            }
+        }
+        for (int floor : floorsToRemove) {
+            floorsToGo.remove(floor);
+        }
+
     }
 
 

@@ -65,7 +65,8 @@ public class ElevatorService {
                 synchronized (elevator) {
                     Integer lowerFloor = routeParams.getParam("lowerFloor") == null ? null : Integer.parseInt(routeParams.getParam("lowerFloor"));
                     Integer higherFloor = routeParams.getParam("higherFloor") == null ? null : Integer.parseInt(routeParams.getParam("higherFloor"));
-                    elevator.reset(routeParams.getParam("cause"), lowerFloor, higherFloor);
+                    Integer cabinZize = routeParams.getParam("cabinSize") == null ? null : Integer.parseInt(routeParams.getParam("cabinSize"));
+                    elevator.reset(routeParams.getParam("cause"), lowerFloor, higherFloor, cabinZize);
                 }
                 long endTime = System.nanoTime();
                 logger.info("Call of reset({}) : time({}us)", routeParams.getParam("cause"), TimeUnit.NANOSECONDS.toMicros(endTime - startTime));

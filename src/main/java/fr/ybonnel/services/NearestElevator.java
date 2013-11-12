@@ -80,8 +80,8 @@ public class NearestElevator extends CleverElevator {
     }
 
     @Override
-    public void reset(String cause, Integer lowerFloor, Integer higherFloor) {
-        super.reset(cause, lowerFloor, higherFloor);
+    public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
+        super.reset(cause, lowerFloor, higherFloor, cabinSize);
         floorsToGo.clear();
     }
 }

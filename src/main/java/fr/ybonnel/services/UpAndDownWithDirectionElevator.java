@@ -58,16 +58,16 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
                 logger.info("Close doors");
                 return close();
             } else {
-                if (floorsByDirection.mustOpenFloorForThisDirection(currentFloor, currentDirection)
+                if (floorsByDirection.mustOpenFloorForThisDirection(currentFloor, currentDirection, getPeopleInsideElevator(), getCabinSize())
                         && lastCommand != Command.CLOSE) {
                     return openIfCan();
                 }
 
-                if (!floorsByDirection.containsFloorForCurrentDirection(currentFloor, currentDirection)) {
+                if (!floorsByDirection.containsFloorForCurrentDirection(currentFloor, currentDirection, getPeopleInsideElevator(), getCabinSize())) {
                     currentDirection = currentDirection.getOtherDirection();
                 }
 
-                if (floorsByDirection.mustOpenFloorForThisDirection(currentFloor, currentDirection)
+                if (floorsByDirection.mustOpenFloorForThisDirection(currentFloor, currentDirection, getPeopleInsideElevator(), getCabinSize())
                         && lastCommand != Command.CLOSE) {
                     return openIfCan();
                 }
@@ -105,16 +105,8 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     }
 
     @Override
-    public void userHasEntered() {
-    }
-
-    @Override
-    public void userHasExited() {
-    }
-
-    @Override
-    public void reset(String cause, Integer lowerFloor, Integer higherFloor) {
-        super.reset(cause, lowerFloor, higherFloor);
+    public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
+        super.reset(cause, lowerFloor, higherFloor, cabinSize);
         currentDirection = Direction.UP;
         floorsByDirection.clear();
         floorsByDirection.setLowerFloor(lowerFloor);

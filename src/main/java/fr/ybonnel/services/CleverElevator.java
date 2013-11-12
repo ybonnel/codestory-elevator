@@ -28,6 +28,17 @@ public abstract class CleverElevator implements Elevator {
     private Integer lowerFloor;
     private Integer higherFloor;
 
+    private int peopleInsideElevator = 0;
+    private int cabinSize = 9999;
+
+    public int getPeopleInsideElevator() {
+        return peopleInsideElevator;
+    }
+
+    public int getCabinSize() {
+        return cabinSize;
+    }
+
     public int getLowerFloor() {
         if (lowerFloor != null) {
             return lowerFloor;
@@ -107,13 +118,15 @@ public abstract class CleverElevator implements Elevator {
     }
 
     @Override
-    public void reset(String cause, Integer lowerFloor, Integer higherFloor) {
+    public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
         mustReset = false;
         currentFloor = 0;
         currentState = State.CLOSE;
         statsOfCall.clear();
         this.lowerFloor = lowerFloor;
         this.higherFloor = higherFloor;
+        peopleInsideElevator = 0;
+        this.cabinSize = cabinSize == null ? 9999 : cabinSize;
     }
 
     protected boolean isOpen() {
@@ -127,5 +140,15 @@ public abstract class CleverElevator implements Elevator {
     protected Command close() {
         currentState = State.CLOSE;
         return Command.CLOSE;
+    }
+
+    @Override
+    public void userHasEntered() {
+        peopleInsideElevator++;
+    }
+
+    @Override
+    public void userHasExited() {
+        peopleInsideElevator--;
     }
 }

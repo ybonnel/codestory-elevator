@@ -19,10 +19,13 @@ package fr.ybonnel.services;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class FloorsByDirection  implements IFloorsByDirection {
 
-    private Map<Direction, HashSet<Integer>> floorsToGo = new HashMap<Direction, HashSet<Integer>>(){{
+    private Set<Integer> floorsToGo = new HashSet<>();
+
+    private Map<Direction, HashSet<Integer>> floorsHasCalled = new HashMap<Direction, HashSet<Integer>>(){{
         put(Direction.DOWN, new HashSet<Integer>());
         put(Direction.UP, new HashSet<Integer>());
     }};
@@ -33,16 +36,23 @@ public class FloorsByDirection  implements IFloorsByDirection {
     }
 
     public void clear() {
-        floorsToGo.get(Direction.DOWN).clear();
-        floorsToGo.get(Direction.UP).clear();
+        floorsToGo.clear();
+        floorsHasCalled.get(Direction.DOWN).clear();
+        floorsHasCalled.get(Direction.UP).clear();
     }
 
-    public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection) {
-        for (int floor : floorsToGo.get(currentDirection)) {
-            if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
+    public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize) {
+        if (peopleInElevator < cabinSize) {
+            for (int floor : floorsHasCalled.get(currentDirection)) {
+                if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
+            }
+            for (int floor : floorsHasCalled.get(currentDirection.getOtherDirection())) {
+                if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
+            }
         }
-        for (int floor : floorsToGo.get(currentDirection.getOtherDirection())) {
+        for (int floor : floorsToGo) {
             if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
+
         }
         return false;
     }
@@ -55,20 +65,23 @@ public class FloorsByDirection  implements IFloorsByDirection {
     }
 
     public void addFloorForDirection(int floor, Direction direction) {
-        floorsToGo.get(direction).add(floor);
+        floorsHasCalled.get(direction).add(floor);
     }
 
-    public boolean mustOpenFloorForThisDirection(int currentFloor, Direction currentDirection) {
-        return floorsToGo.get(currentDirection).contains(currentFloor);
+    public boolean mustOpenFloorForThisDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize) {
+        return (peopleInElevator < cabinSize && floorsHasCalled.get(currentDirection).contains(currentFloor))
+                || floorsToGo.contains(currentFloor);
     }
 
     public void willOpenDoorsOnFloor(int floor) {
-        floorsToGo.get(Direction.DOWN).remove(floor);
-        floorsToGo.get(Direction.UP).remove(floor);
+        floorsHasCalled.get(Direction.DOWN).remove(floor);
+        floorsHasCalled.get(Direction.UP).remove(floor);
+        floorsToGo.remove(floor);
     }
 
     public boolean isEmpty() {
-        return floorsToGo.get(Direction.DOWN).isEmpty() && floorsToGo.get(Direction.UP).isEmpty();
+        return floorsHasCalled.get(Direction.DOWN).isEmpty() && floorsHasCalled.get(Direction.UP).isEmpty()
+                && floorsToGo.isEmpty();
     }
 
     @Override
@@ -76,8 +89,7 @@ public class FloorsByDirection  implements IFloorsByDirection {
     }
 
     public void addFloorToGo(int floor, int currentFloor) {
-        floorsToGo.get(Direction.UP).add(floor);
-        floorsToGo.get(Direction.DOWN).add(floor);
+        floorsToGo.add(floor);
     }
 
     @Override

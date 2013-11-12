@@ -56,7 +56,7 @@ public class Omnibus implements Elevator {
     }
 
     @Override
-    public void reset(String cause, Integer lowerFloor, Integer higherFloor) {
+    public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
         currentIndex = 0;
     }
 }

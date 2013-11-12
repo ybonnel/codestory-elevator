@@ -20,11 +20,11 @@ public interface IFloorsByDirection {
 
     public void clear();
 
-    public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection);
+    public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize);
 
     public void addFloorForDirection(int floor, Direction direction);
 
-    public boolean mustOpenFloorForThisDirection(int currentFloor, Direction currentDirection);
+    public boolean mustOpenFloorForThisDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize);
 
     public void willOpenDoorsOnFloor(int floor);
 
