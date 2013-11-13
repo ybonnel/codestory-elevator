@@ -22,8 +22,8 @@ public class AlzheimerFastDeliverFloorsByDirection extends AlzheimerFloorsByDire
 
     @Override
     public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize) {
-        if (floorsToGo.isEmpty()) {
-            int floorToGo = getFloorWithMaxWait();
+        if (floorsToGo.isEmpty() && peopleInElevator < cabinSize) {
+            int floorToGo = getFloorWithMaxWait(currentFloor);
             if (floorToGo != -1) {
                 return isFloorGoodForCurrentDirection(floorToGo, currentFloor, currentDirection);
             }
@@ -31,17 +31,24 @@ public class AlzheimerFastDeliverFloorsByDirection extends AlzheimerFloorsByDire
         for (int floor : floorsToGo.keySet()) {
             if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
         }
+        if (floorsToGo.isEmpty() && ((floorsHasCalled.get(Direction.DOWN).isEmpty()
+                && floorsHasCalled.get(Direction.UP).isEmpty())
+                || peopleInElevator >= cabinSize)) {
+            for (int floor : oldFloorsToGo) {
+                if (isFloorGoodForCurrentDirection(floor, currentFloor, currentDirection)) return true;
+            }
+        }
         return false;
 
     }
 
-    private int getFloorWithMaxWait() {
+    private int getFloorWithMaxWait(int currentFloor) {
         int maxWait = 0;
         int floorToGo = -1;
         for (Direction direction : Direction.values()) {
             for (Map.Entry<Integer, Integer> floor : floorsHasCalled.get(direction).entrySet()) {
-                if (floor.getValue() > maxWait) {
-                    maxWait = floor.getValue();
+                if (Math.abs(floor.getValue() - currentFloor) > maxWait) {
+                    maxWait = Math.abs(floor.getValue() - currentFloor);
                     floorToGo = floor.getKey();
                 }
             }
@@ -53,6 +60,11 @@ public class AlzheimerFastDeliverFloorsByDirection extends AlzheimerFloorsByDire
     public boolean mustOpenFloorForThisDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize) {
         return (floorsToGo.containsKey(currentFloor)
                 || (floorsToGo.isEmpty() &&
-            getFloorWithMaxWait() == currentFloor));
+            getFloorWithMaxWait(currentFloor) == currentFloor)
+                || (
+                (floorsToGo.isEmpty() && ((floorsHasCalled.get(Direction.DOWN).isEmpty()
+                        && floorsHasCalled.get(Direction.UP).isEmpty())
+                        || peopleInElevator >= cabinSize))
+                        && oldFloorsToGo.contains(currentFloor)));
     }
 }
