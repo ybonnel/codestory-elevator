@@ -32,7 +32,7 @@ public class FloorsByDirection  implements IFloorsByDirection {
 
     @Override
     public String toString() {
-        return floorsToGo.toString();
+        return "FloorsToGo : " + floorsToGo.toString() + ", FloorsHasCalled : " + floorsHasCalled;
     }
 
     public void clear() {

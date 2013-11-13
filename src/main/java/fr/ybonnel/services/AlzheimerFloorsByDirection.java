@@ -33,18 +33,18 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     public void setHigherFloor(Integer higherFloor) {
     }
 
-    private Map<Direction, Map<Integer, Integer>> floorsHasCalled = new HashMap<Direction, Map<Integer, Integer>>() {{
+    protected Map<Direction, Map<Integer, Integer>> floorsHasCalled = new HashMap<Direction, Map<Integer, Integer>>() {{
         put(Direction.DOWN, new HashMap<Integer, Integer>());
         put(Direction.UP, new HashMap<Integer, Integer>());
     }};
 
-    private Map<Integer, Integer> floorsToGo = new HashMap<>();
+    protected Map<Integer, Integer> floorsToGo = new HashMap<>();
 
     private Map<Integer, Integer> lastWaitTimeBeforeOpen = new HashMap<>();
 
     @Override
     public String toString() {
-        return floorsToGo.toString();
+        return "FloorsToGo : " + floorsToGo.toString() + ", FloorsHasCalled : " + floorsHasCalled;
     }
 
     public void clear() {
@@ -68,7 +68,7 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
         return false;
     }
 
-    private boolean isFloorGoodForCurrentDirection(int floor, int currentFloor, Direction currentDirection) {
+    protected boolean isFloorGoodForCurrentDirection(int floor, int currentFloor, Direction currentDirection) {
         return currentDirection == Direction.UP
                 && floor > currentFloor
                 || currentDirection == Direction.DOWN
@@ -99,6 +99,7 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     public void willOpenDoorsOnFloor(int floor) {
         Integer waitTimeDown = floorsHasCalled.get(Direction.DOWN).remove(floor);
         Integer waitTimeUp = floorsHasCalled.get(Direction.UP).remove(floor);
+        floorsToGo.remove(floor);
         int waitTime = getNbMaxWait() * 2;
         if (waitTimeDown != null && waitTimeUp != null) {
             waitTime = Math.max(waitTimeDown, waitTimeUp);
