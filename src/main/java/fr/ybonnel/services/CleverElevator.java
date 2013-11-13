@@ -95,7 +95,7 @@ public abstract class CleverElevator implements Elevator {
 
     private int getBestFloorToWait() {
         if (statsOfCall.getN() > 0) {
-            return (int) Math.round(statsOfCall.apply(new Median()));
+            return (int) Math.round(statsOfCall.getMean());
         } else {
             return 0;
         }
@@ -123,6 +123,10 @@ public abstract class CleverElevator implements Elevator {
         currentFloor = 0;
         currentState = State.CLOSE;
         statsOfCall.clear();
+        int mid = (getHigherFloor() + getLowerFloor()) / 2;
+        for (int i=0; i < 20; i++) {
+            statsOfCall.addValue(mid);
+        }
         this.lowerFloor = lowerFloor;
         this.higherFloor = higherFloor;
         peopleInsideElevator = 0;
