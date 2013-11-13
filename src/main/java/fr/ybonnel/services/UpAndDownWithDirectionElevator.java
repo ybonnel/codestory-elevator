@@ -38,9 +38,11 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     }
 
     public void logState() {
-        logger.info("CurrentDirection : {}, FloorsByDirection : {}",
+        logger.info("CurrentDirection : {}, FloorsByDirection : {}, PeopleInsideElevator : {}, CabinSize : {}",
                 currentDirection,
-                floorsByDirection);
+                floorsByDirection,
+                getPeopleInsideElevator(),
+                getCabinSize());
     }
 
 
