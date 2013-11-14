@@ -24,7 +24,7 @@ public class AlzheimerFastDeliverFloorsByDirection extends AlzheimerFloorsByDire
     public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize) {
         if (floorsToGo.isEmpty() && peopleInElevator < cabinSize) {
             int floorToGo = getFloorWithMaxWait(currentFloor);
-            if (floorToGo != -1) {
+            if (floorToGo != null) {
                 return isFloorGoodForCurrentDirection(floorToGo, currentFloor, currentDirection);
             }
         }
@@ -42,9 +42,9 @@ public class AlzheimerFastDeliverFloorsByDirection extends AlzheimerFloorsByDire
 
     }
 
-    private int getFloorWithMaxWait(int currentFloor) {
+    private Integer getFloorWithMaxWait(int currentFloor) {
         int maxWait = 0;
-        int floorToGo = -1;
+        Integer floorToGo = null;
         for (Direction direction : Direction.values()) {
             for (Map.Entry<Integer, Integer> floor : floorsHasCalled.get(direction).entrySet()) {
                 if (Math.abs(floor.getValue() - currentFloor) > maxWait) {
@@ -58,9 +58,11 @@ public class AlzheimerFastDeliverFloorsByDirection extends AlzheimerFloorsByDire
 
     @Override
     public boolean mustOpenFloorForThisDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize) {
+        Integer floorWithMaxWait = getFloorWithMaxWait(currentFloor);
         return (floorsToGo.containsKey(currentFloor)
-                || (floorsToGo.isEmpty() &&
-            getFloorWithMaxWait(currentFloor) == currentFloor)
+                || (floorsToGo.isEmpty()
+                && floorWithMaxWait != null
+                && floorWithMaxWait == currentFloor)
                 || (
                 (floorsToGo.isEmpty() && ((floorsHasCalled.get(Direction.DOWN).isEmpty()
                         && floorsHasCalled.get(Direction.UP).isEmpty())
