@@ -8,7 +8,18 @@ import fr.ybonnel.services.NearestElevator;
 import fr.ybonnel.services.Omnibus;
 import fr.ybonnel.services.OptimizedAlzheimerElevator;
 import fr.ybonnel.services.UpAndDownWithDirectionElevator;
+import fr.ybonnel.simpleweb4j.exception.HttpErrorException;
+import fr.ybonnel.simpleweb4j.handlers.Route;
+import fr.ybonnel.simpleweb4j.handlers.RouteParameters;
+import fr.ybonnel.simpleweb4j.handlers.filter.AbstractFilter;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static fr.ybonnel.simpleweb4j.SimpleWeb4j.*;
@@ -18,6 +29,8 @@ import static fr.ybonnel.simpleweb4j.SimpleWeb4j.*;
  */
 public class Main {
 
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
     public final static Elevator elevators[] = {
             new Omnibus(),
             new FastDeliverElevator(),
@@ -26,6 +39,17 @@ public class Main {
             new AlzheimerElevator(),
             new OptimizedAlzheimerElevator()
     };
+
+    public static String getFullURL(HttpServletRequest request) {
+        StringBuilder requestURL = new StringBuilder(request.getMethod());
+        requestURL.append(" - ");
+        requestURL.append(request.getPathInfo());
+        if (request.getQueryString() == null) {
+            return requestURL.toString();
+        } else {
+            return requestURL.append('?').append(request.getQueryString()).toString();
+        }
+    }
 
 
     /**
@@ -39,6 +63,13 @@ public class Main {
         setPort(port);
         // Set the path to static resources.
         setPublicResourcesPath("/fr/ybonnel/public");
+
+        addSpecificHandler(new AbstractHandler() {
+            @Override
+            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+                logger.info("Call of {} for {}", request.getRemoteAddr(), getFullURL(request));
+            }
+        });
 
         for (Elevator elevator : elevators) {
             new ElevatorService("/" + elevator.getClass().getSimpleName(), elevator).registerRoutes();
