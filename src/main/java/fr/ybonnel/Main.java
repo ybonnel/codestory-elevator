@@ -6,6 +6,7 @@ import fr.ybonnel.services.ElevatorService;
 import fr.ybonnel.services.FastDeliverElevator;
 import fr.ybonnel.services.NearestElevator;
 import fr.ybonnel.services.Omnibus;
+import fr.ybonnel.services.OptimizedAlzheimerElevator;
 import fr.ybonnel.services.UpAndDownWithDirectionElevator;
 
 import java.io.IOException;
@@ -22,7 +23,8 @@ public class Main {
             new FastDeliverElevator(),
             new NearestElevator(),
             new UpAndDownWithDirectionElevator(),
-            new AlzheimerElevator()
+            new AlzheimerElevator(),
+            new OptimizedAlzheimerElevator()
     };
 
 
@@ -41,7 +43,7 @@ public class Main {
         for (Elevator elevator : elevators) {
             new ElevatorService("/" + elevator.getClass().getSimpleName(), elevator).registerRoutes();
         }
-        new ElevatorService("/elevator", new UpAndDownWithDirectionElevator()).registerRoutes();
+        new ElevatorService("/elevator", new OptimizedAlzheimerElevator()).registerRoutes();
 
         // Start the server.
         start(waitStop);
