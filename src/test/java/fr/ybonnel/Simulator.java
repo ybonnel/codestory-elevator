@@ -23,6 +23,7 @@ import fr.ybonnel.services.FastDeliverElevator;
 import fr.ybonnel.services.OptimizedAlzheimerElevator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -76,10 +77,11 @@ public class Simulator {
 
     public static void main(String[] args) {
 
+        FastDeliverElevator fastDeliverElevator = new FastDeliverElevator();
         Simulator simulator = new Simulator(2,
                 new OptimizedAlzheimerElevator(),
                 new AlzheimerElevator(),
-                new FastDeliverElevator());
+                fastDeliverElevator);
 
         for (int i=0; i<5000; i++) {
             simulator.runOneTick();
@@ -91,6 +93,8 @@ public class Simulator {
                     + " : "
                     + elevatorWithState.getScore());
         }
+
+        System.out.println(fastDeliverElevator.getPeopleByTick());
 
 
     }

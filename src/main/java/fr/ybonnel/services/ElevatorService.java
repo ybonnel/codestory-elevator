@@ -24,6 +24,9 @@ import fr.ybonnel.simpleweb4j.handlers.RouteParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static fr.ybonnel.simpleweb4j.SimpleWeb4j.get;
@@ -143,5 +146,21 @@ public class ElevatorService {
         get(getGoRoute());
         get(getUserHasEnteredRoute());
         get(getUserHasExitedRoute());
+        if (elevator instanceof FastDeliverElevator) {
+            get(new Route<Void, List<Integer>>("/stats", Void.class) {
+                @Override
+                public Response<List<Integer>> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+
+                    return new Response<>(((FastDeliverElevator) elevator).getPeopleByTick());
+                }
+            });
+            get(new Route<Void, Integer>("/currenttick", Void.class){
+
+                @Override
+                public Response<Integer> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                    return new Response<>(((FastDeliverElevator) elevator).getCurrentTick());
+                }
+            });
+        }
     }
 }

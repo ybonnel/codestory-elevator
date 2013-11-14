@@ -24,4 +24,6 @@ public interface Elevator {
     void userHasEntered();
     void userHasExited();
     void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize);
+
+
 }
