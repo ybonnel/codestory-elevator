@@ -142,13 +142,13 @@ public class OptimizedAlzheimerFloorsByDirection implements IFloorsByDirection {
                 for (int waitTime : oldFloorsHasCalled.get(direction).get(floor)) {
                     lastWaitTimeBeforeOpen.get(floor).get(direction).add(waitTime);
                 }
-                oldFloorsHasCalled.get(direction).get(floor).clear();
+                oldFloorsHasCalled.get(direction).remove(floor);
             }
             if (floorsHasCalled.get(direction).containsKey(floor)) {
                 for (int waitTime : floorsHasCalled.get(direction).get(floor)) {
                     lastWaitTimeBeforeOpen.get(floor).get(direction).add(waitTime);
                 }
-                floorsHasCalled.get(direction).get(floor).clear();
+                floorsHasCalled.get(direction).remove(floor);
             }
         }
         floorsToGo.remove(floor);
