@@ -23,7 +23,7 @@ public class AlzheimerFastDeliverFloorsByDirection extends AlzheimerFloorsByDire
     @Override
     public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize) {
         if (floorsToGo.isEmpty() && peopleInElevator < cabinSize) {
-            int floorToGo = getFloorWithMaxWait(currentFloor);
+            Integer floorToGo = getFloorWithMaxWait(currentFloor);
             if (floorToGo != null) {
                 return isFloorGoodForCurrentDirection(floorToGo, currentFloor, currentDirection);
             }
