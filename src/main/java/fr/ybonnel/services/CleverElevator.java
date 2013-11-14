@@ -67,6 +67,10 @@ public abstract class CleverElevator implements Elevator {
         } else {
             lastCommand = getNextCommand();
         }
+        if (lastCommand == Command.CLOSE && !peopleActivity) {
+            lastCommand = Command.FORCERESET;
+        }
+        peopleActivity = false;
         return lastCommand;
     }
 
@@ -146,13 +150,17 @@ public abstract class CleverElevator implements Elevator {
         return Command.CLOSE;
     }
 
+    private boolean peopleActivity = false;
+
     @Override
     public void userHasEntered() {
         peopleInsideElevator++;
+        peopleActivity = true;
     }
 
     @Override
     public void userHasExited() {
         peopleInsideElevator--;
+        peopleActivity = true;
     }
 }

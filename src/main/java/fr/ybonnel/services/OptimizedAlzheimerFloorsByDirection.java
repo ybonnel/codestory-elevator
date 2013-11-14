@@ -62,6 +62,7 @@ public class OptimizedAlzheimerFloorsByDirection implements IFloorsByDirection {
         oldFloorsHasCalled.get(Direction.DOWN).clear();
         oldFloorsHasCalled.get(Direction.UP).clear();
         floorsToGo.clear();
+        lastWaitTimeBeforeOpen.clear();
         oldFloorsToGo.clear();
     }
 
