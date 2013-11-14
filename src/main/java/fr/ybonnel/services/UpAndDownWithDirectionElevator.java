@@ -101,7 +101,7 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     }
 
     @Override
-    public void go(int floorToGo) {
+    public void addGo(int floorToGo) {
         if (floorToGo != currentFloor || isClose()) {
             floorsByDirection.addFloorToGo(floorToGo, currentFloor);
         }

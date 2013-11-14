@@ -93,11 +93,24 @@ public abstract class CleverElevator implements Elevator {
 
     @Override
     public final void call(int floor, String to) {
+        if (floor < getLowerFloor() || floor > getHigherFloor()) {
+            return;
+        }
         addCallToMap(floor);
         addCall(floor, to);
     }
 
     protected abstract void addCall(int floor, String to);
+
+    @Override
+    public void go(int floorToGo) {
+        if (floorToGo >= getLowerFloor() && floorToGo <= getHigherFloor()) {
+            addGo(floorToGo);
+        }
+    }
+
+    protected abstract void addGo(int floorToGo);
+
 
     private void addCallToMap(int floor) {
         statsOfCall.addValue(floor);

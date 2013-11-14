@@ -67,7 +67,7 @@ public class NearestElevator extends CleverElevator {
     }
 
     @Override
-    public void go(int floorToGo) {
+    public void addGo(int floorToGo) {
         floorsToGo.add(floorToGo);
     }
 
