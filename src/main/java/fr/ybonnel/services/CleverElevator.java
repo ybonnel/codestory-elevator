@@ -67,9 +67,9 @@ public abstract class CleverElevator implements Elevator {
         } else {
             lastCommand = getNextCommand();
         }
-        if (lastCommand == Command.CLOSE && !peopleActivity) {
+        /*if (lastCommand == Command.CLOSE && !peopleActivity) {
             lastCommand = Command.FORCERESET;
-        }
+        }*/
         peopleActivity = false;
         return lastCommand;
     }
