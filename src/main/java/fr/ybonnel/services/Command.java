@@ -21,5 +21,6 @@ public enum Command {
     DOWN,
     OPEN,
     CLOSE,
-    NOTHING
+    NOTHING,
+    FORCERESET
 }

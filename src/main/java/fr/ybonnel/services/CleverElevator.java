@@ -62,8 +62,8 @@ public abstract class CleverElevator implements Elevator {
 
     @Override
     public final Command nextCommand() {
-        if (mustReset) {
-            lastCommand = Command.CLOSE;
+        if (mustReset || peopleInsideElevator >= cabinSize) {
+            lastCommand = Command.FORCERESET;
         } else {
             lastCommand = getNextCommand();
         }
