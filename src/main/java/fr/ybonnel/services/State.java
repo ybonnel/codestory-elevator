@@ -16,7 +16,7 @@
  */
 package fr.ybonnel.services;
 
-enum State {
+public enum State {
     OPEN,
     CLOSE
 }
