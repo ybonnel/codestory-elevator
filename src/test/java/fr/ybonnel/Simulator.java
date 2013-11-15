@@ -16,36 +16,37 @@
  */
 package fr.ybonnel;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import fr.ybonnel.services.AlzheimerElevator;
-import fr.ybonnel.services.AlzheimerFastDeliverFloorsByDirection;
 import fr.ybonnel.services.Elevator;
 import fr.ybonnel.services.FastDeliverElevator;
 import fr.ybonnel.services.OptimizedAlzheimerElevator;
 
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 public class Simulator {
 
-    private static final int LOWER_FLOOR = 0;
-    private static final int HIGHER_FLOOR = 19;
+    private static final int LOWER_FLOOR = -3;
+    private static final int HIGHER_FLOOR = 25;
     private static final int CABIN_SIZE = 42;
 
     private int currentTick = 0;
 
     private final Random random;
-    private final double chanceToCreateUser;
 
     private List<ElevatorWithState> elevatorWithStates = new ArrayList<>();
+    private final List<Integer> arrivals;
 
-    public Simulator(double chanceToCreateUser, Elevator ... elevators) {
+    public Simulator(List<Integer> arrivals, Elevator ... elevators) {
+        this.arrivals = arrivals;
         random = new Random();
         for (Elevator elevator : elevators) {
             elevatorWithStates.add(new ElevatorWithState(elevator, LOWER_FLOOR, HIGHER_FLOOR, CABIN_SIZE));
         }
-        this.chanceToCreateUser = chanceToCreateUser;
     }
 
     private void runOneTick() {
@@ -53,22 +54,15 @@ public class Simulator {
             elevatorWithState.oneTick(currentTick);
         }
 
-        int nbRandom = (int) Math.ceil(chanceToCreateUser);
+        for (int i = 0; i < arrivals.get(currentTick % arrivals.size()); i++) {
+            int startFloor = random.nextInt(HIGHER_FLOOR - LOWER_FLOOR + 1) - LOWER_FLOOR;
+            int destinationFloor;
+            do {
+                destinationFloor = random.nextInt(HIGHER_FLOOR - LOWER_FLOOR + 1) - LOWER_FLOOR;
+            } while (destinationFloor == startFloor);
 
-        double probability = chanceToCreateUser / ((double)nbRandom);
-
-        for (int i = 0; i < nbRandom; i++) {
-            if (random.nextDouble() <= probability) {
-                int startFloor = random.nextInt(HIGHER_FLOOR - LOWER_FLOOR + 1) - LOWER_FLOOR;
-                int destinationFloor;
-                do {
-                    destinationFloor = random.nextInt(HIGHER_FLOOR - LOWER_FLOOR + 1) - LOWER_FLOOR;
-                } while (destinationFloor == startFloor);
-
-                for (ElevatorWithState elevatorWithState : elevatorWithStates) {
-                    elevatorWithState.addUser(currentTick, startFloor, destinationFloor);
-                }
-
+            for (ElevatorWithState elevatorWithState : elevatorWithStates) {
+                elevatorWithState.addUser(currentTick, startFloor, destinationFloor);
             }
         }
 
@@ -76,14 +70,16 @@ public class Simulator {
     }
 
     public static void main(String[] args) {
+        List<Integer> arrivals = new GsonBuilder().create().fromJson(
+                new InputStreamReader(Simulator.class.getResourceAsStream("/repartition.json")),
+                new TypeToken<List<Integer>>(){}.getType());
 
-        FastDeliverElevator fastDeliverElevator = new FastDeliverElevator();
-        Simulator simulator = new Simulator(2,
+        Simulator simulator = new Simulator(arrivals,
                 new OptimizedAlzheimerElevator(),
                 new AlzheimerElevator(),
-                fastDeliverElevator);
+                new FastDeliverElevator());
 
-        for (int i=0; i<5000; i++) {
+        for (int i=0; i<arrivals.size()*2; i++) {
             simulator.runOneTick();
         }
 
@@ -93,10 +89,6 @@ public class Simulator {
                     + " : "
                     + elevatorWithState.getScore());
         }
-
-        System.out.println(fastDeliverElevator.getPeopleByTick());
-
-
     }
 
 
