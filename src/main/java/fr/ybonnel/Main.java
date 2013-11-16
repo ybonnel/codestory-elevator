@@ -1,6 +1,7 @@
 package fr.ybonnel;
 
 import fr.ybonnel.services.AlzheimerElevator;
+import fr.ybonnel.services.ByUserElevator;
 import fr.ybonnel.services.Elevator;
 import fr.ybonnel.services.ElevatorService;
 import fr.ybonnel.services.FastDeliverElevator;
@@ -37,7 +38,8 @@ public class Main {
             new NearestElevator(),
             new UpAndDownWithDirectionElevator(),
             new AlzheimerElevator(),
-            new OptimizedAlzheimerElevator()
+            new OptimizedAlzheimerElevator(),
+            new ByUserElevator(1, 1, 50)
     };
 
     public static String getFullURL(HttpServletRequest request) {

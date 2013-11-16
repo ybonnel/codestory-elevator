@@ -18,6 +18,7 @@ package fr.ybonnel;
 
 import fr.ybonnel.services.AlzheimerElevator;
 import fr.ybonnel.services.AlzheimerFloorsByDirection;
+import fr.ybonnel.services.ByUserElevator;
 import fr.ybonnel.services.Command;
 import fr.ybonnel.services.Elevator;
 import fr.ybonnel.services.OptimizedAlzheimerElevator;
@@ -132,6 +133,10 @@ public class ElevatorWithState {
                     + " - " + peopleInElevatorForOverFlow
                     + ")";
 
+        } else if (elevator instanceof ByUserElevator) {
+            return name + "(" + ((ByUserElevator) elevator).getMinScoreOnFloor()
+                    + " - " + ((ByUserElevator) elevator).getCurrentScore()
+                    + ")";
         }
         return name;
     }

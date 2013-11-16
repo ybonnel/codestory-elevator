@@ -19,13 +19,13 @@ package fr.ybonnel;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import fr.ybonnel.services.AlzheimerElevator;
+import fr.ybonnel.services.ByUserElevator;
 import fr.ybonnel.services.Elevator;
 import fr.ybonnel.services.FastDeliverElevator;
 import fr.ybonnel.services.OptimizedAlzheimerElevator;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -75,10 +75,12 @@ public class Simulator {
                 new InputStreamReader(Simulator.class.getResourceAsStream("/repartition.json")),
                 new TypeToken<List<Integer>>(){}.getType());
 
+        ByUserElevator byUserElevator = new ByUserElevator(1, 1, 50);
         Simulator simulator = new Simulator(arrivals,
                 new OptimizedAlzheimerElevator(),
                 new AlzheimerElevator(),
-                new FastDeliverElevator());
+                new FastDeliverElevator(),
+                byUserElevator);
 
         for (int i=0; i<arrivals.size()*2; i++) {
             simulator.runOneTick();
@@ -91,12 +93,16 @@ public class Simulator {
                     + elevatorWithState.getScore());
         }
 
-        /*List<OptimizedAlzheimerElevator> elevators = new ArrayList<>();
+        System.out.println(byUserElevator.getCurrentScore());
 
-        for (int nbMaxWaitNoOver = 1; nbMaxWaitNoOver <= 20; nbMaxWaitNoOver++) {
-            for (int nbMaxWaitOver = 1; nbMaxWaitOver <= 20; nbMaxWaitOver++) {
-                for (int overFlowCabin = 1; overFlowCabin <= 42; overFlowCabin++) {
-                   elevators.add(new OptimizedAlzheimerElevator(
+
+
+        List<ByUserElevator> elevators = new ArrayList<>();
+
+        for (int nbMaxWaitNoOver = 1; nbMaxWaitNoOver <= 10; nbMaxWaitNoOver++) {
+            for (int nbMaxWaitOver = 1; nbMaxWaitOver <= 10; nbMaxWaitOver++) {
+                for (int overFlowCabin = 0; overFlowCabin <= 30; overFlowCabin++) {
+                   elevators.add(new ByUserElevator(
                            nbMaxWaitNoOver,
                            nbMaxWaitOver,
                            overFlowCabin
@@ -114,21 +120,21 @@ public class Simulator {
         }
 
         int maxScore = 0;
-        OptimizedAlzheimerElevator bestElevator = null;
+        ByUserElevator bestElevator = null;
 
         for (ElevatorWithState elevatorWithState : simulator.elevatorWithStates) {
             if (elevatorWithState.getScore() > maxScore) {
                 maxScore = elevatorWithState.getScore();
-                bestElevator = (OptimizedAlzheimerElevator) elevatorWithState.getElevator();
+                bestElevator = (ByUserElevator) elevatorWithState.getElevator();
             }
         }
 
         System.out.println("Best score : " + maxScore);
         System.out.println("Parameters : ("
-                + bestElevator.getNbMaxWaitWithNoOverPeople()
-                + " - " + bestElevator.getNbMaxWaitWithOverPeople()
-                + " - " + bestElevator.getPeopleInElevatorForOverFlow()
-                + ")");*/
+                + bestElevator.getMinScoreOnFloor()
+                + " - " + bestElevator.getMinScoreOnFloorWithOver()
+                + " - " + bestElevator.getNbPeopleForOver()
+                + ")");
 
     }
 

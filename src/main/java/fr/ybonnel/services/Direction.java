@@ -17,8 +17,18 @@
 package fr.ybonnel.services;
 
 public enum Direction {
-    UP(Command.UP, 1),
-    DOWN(Command.DOWN, -1);
+    UP(Command.UP, 1) {
+        @Override
+        public boolean floorIsOnDirection(int currentFloor, int destinationFloor) {
+            return currentFloor <= destinationFloor;
+        }
+    },
+    DOWN(Command.DOWN, -1) {
+        @Override
+        public boolean floorIsOnDirection(int currentFloor, int destinationFloor) {
+            return currentFloor >= destinationFloor;
+        }
+    };
 
     public Command commandToGo;
 
@@ -32,4 +42,6 @@ public enum Direction {
     public Direction getOtherDirection() {
         return this == UP ? DOWN : UP;
     }
+
+    public abstract boolean floorIsOnDirection(int currentFloor, int destinationFloor);
 }
