@@ -27,6 +27,10 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
 
     private IFloorsByDirection floorsByDirection;
 
+    public IFloorsByDirection getFloorsByDirection() {
+        return floorsByDirection;
+    }
+
     public UpAndDownWithDirectionElevator() {
         logger = LoggerFactory.getLogger(getClass());
         floorsByDirection = new FloorsByDirection();
@@ -38,12 +42,12 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
     }
 
     public void logState() {
-        logger.info("CurrentDirection : {}, CurrentFloor : {}, FloorsByDirection : {}, PeopleInsideElevator : {}, CabinSize : {}",
+        /*logger.info("CurrentDirection : {}, CurrentFloor : {}, FloorsByDirection : {}, PeopleInsideElevator : {}, CabinSize : {}",
                 currentDirection,
                 currentFloor,
                 floorsByDirection,
                 getPeopleInsideElevator(),
-                getCabinSize());
+                getCabinSize());*/
     }
 
 
@@ -58,7 +62,7 @@ public class UpAndDownWithDirectionElevator extends CleverElevator {
         floorsByDirection.nextCommandCalled(currentFloor);
         if (hasFloorsToGo()) {
             if (isOpen()) {
-                logger.info("Close doors");
+                //logger.info("Close doors");
                 return close();
             } else {
                 if (floorsByDirection.mustOpenFloorForThisDirection(currentFloor, currentDirection, getPeopleInsideElevator(), getCabinSize())

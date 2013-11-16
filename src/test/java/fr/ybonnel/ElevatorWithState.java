@@ -16,9 +16,14 @@
  */
 package fr.ybonnel;
 
+import fr.ybonnel.services.AlzheimerElevator;
+import fr.ybonnel.services.AlzheimerFloorsByDirection;
 import fr.ybonnel.services.Command;
 import fr.ybonnel.services.Elevator;
+import fr.ybonnel.services.OptimizedAlzheimerElevator;
+import fr.ybonnel.services.OptimizedAlzheimerFloorsByDirection;
 import fr.ybonnel.services.State;
+import fr.ybonnel.services.UpAndDownWithDirectionElevator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -87,8 +92,7 @@ public class ElevatorWithState {
                         elevator.userHasExited();
                         iterator.remove();
                     }
-                }
-                else {
+                } else {
                     if (currentFloor == user.getStartFloor()) {
                         user.enterElevator(tick);
                         elevator.userHasEntered();
@@ -104,7 +108,7 @@ public class ElevatorWithState {
         currentState = State.CLOSE;
         score = score - 10;
         users.clear();
-        elevator.reset(cause,lowerFloor, higherFloor, cabinSize);
+        elevator.reset(cause, lowerFloor, higherFloor, cabinSize);
     }
 
 
@@ -114,5 +118,21 @@ public class ElevatorWithState {
 
     public int getScore() {
         return score;
+    }
+
+    public String getName() {
+        String name = elevator.getClass().getSimpleName();
+        if (elevator instanceof OptimizedAlzheimerElevator) {
+            int nbMaxWaitWithNoOverPeople = ((OptimizedAlzheimerElevator) elevator).getNbMaxWaitWithNoOverPeople();
+            int nbMaxWaitWithOverPeople = ((OptimizedAlzheimerElevator) elevator).getNbMaxWaitWithOverPeople();
+            int peopleInElevatorForOverFlow = ((OptimizedAlzheimerElevator) elevator).getPeopleInElevatorForOverFlow();
+
+            return name + "(" + nbMaxWaitWithNoOverPeople
+                    + " - " + nbMaxWaitWithOverPeople
+                    + " - " + peopleInElevatorForOverFlow
+                    + ")";
+
+        }
+        return name;
     }
 }

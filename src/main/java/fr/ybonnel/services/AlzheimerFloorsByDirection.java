@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class AlzheimerFloorsByDirection implements IFloorsByDirection {
 
-    private int getNbMaxWait() {
+    public int getNbMaxWait() {
         return 19;
     }
 

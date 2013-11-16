@@ -25,6 +25,7 @@ import fr.ybonnel.services.OptimizedAlzheimerElevator;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -85,10 +86,50 @@ public class Simulator {
 
         for (ElevatorWithState elevatorWithState : simulator.elevatorWithStates) {
             System.out.println("Elevator "
-                    + elevatorWithState.getElevator().getClass().getSimpleName()
+                    + elevatorWithState.getName()
                     + " : "
                     + elevatorWithState.getScore());
         }
+
+        /*List<OptimizedAlzheimerElevator> elevators = new ArrayList<>();
+
+        for (int nbMaxWaitNoOver = 1; nbMaxWaitNoOver <= 20; nbMaxWaitNoOver++) {
+            for (int nbMaxWaitOver = 1; nbMaxWaitOver <= 20; nbMaxWaitOver++) {
+                for (int overFlowCabin = 1; overFlowCabin <= 42; overFlowCabin++) {
+                   elevators.add(new OptimizedAlzheimerElevator(
+                           nbMaxWaitNoOver,
+                           nbMaxWaitOver,
+                           overFlowCabin
+                   ));
+                }
+            }
+        }
+
+        simulator = new Simulator(arrivals,
+                elevators.toArray(new Elevator[elevators.size()]));
+
+        for (int i=0; i<arrivals.size()*2; i++) {
+            System.out.println(i);
+            simulator.runOneTick();
+        }
+
+        int maxScore = 0;
+        OptimizedAlzheimerElevator bestElevator = null;
+
+        for (ElevatorWithState elevatorWithState : simulator.elevatorWithStates) {
+            if (elevatorWithState.getScore() > maxScore) {
+                maxScore = elevatorWithState.getScore();
+                bestElevator = (OptimizedAlzheimerElevator) elevatorWithState.getElevator();
+            }
+        }
+
+        System.out.println("Best score : " + maxScore);
+        System.out.println("Parameters : ("
+                + bestElevator.getNbMaxWaitWithNoOverPeople()
+                + " - " + bestElevator.getNbMaxWaitWithOverPeople()
+                + " - " + bestElevator.getPeopleInElevatorForOverFlow()
+                + ")");*/
+
     }
 
 

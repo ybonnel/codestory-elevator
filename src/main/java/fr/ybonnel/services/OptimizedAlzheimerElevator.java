@@ -18,7 +18,33 @@ package fr.ybonnel.services;
 
 public class OptimizedAlzheimerElevator extends UpAndDownWithDirectionElevator {
 
+    private final int nbMaxWaitWithNoOverPeople;
+    private final int nbMaxWaitWithOverPeople;
+    private final int peopleInElevatorForOverFlow;
+
+    public OptimizedAlzheimerElevator(final int nbMaxWaitWithNoOverPeople,
+                                      final int nbMaxWaitWithOverPeople,
+                                      final int peopleInElevatorForOverFlow) {
+        super(new OptimizedAlzheimerFloorsByDirection(nbMaxWaitWithNoOverPeople, nbMaxWaitWithOverPeople, peopleInElevatorForOverFlow));
+        ((OptimizedAlzheimerFloorsByDirection) getFloorsByDirection()).setElevator(this);
+        this.nbMaxWaitWithNoOverPeople = nbMaxWaitWithNoOverPeople;
+        this.nbMaxWaitWithOverPeople = nbMaxWaitWithOverPeople;
+        this.peopleInElevatorForOverFlow = peopleInElevatorForOverFlow;
+    }
+
     public OptimizedAlzheimerElevator() {
-        super(new OptimizedAlzheimerFloorsByDirection());
+        this(11, 16, 30);
+    }
+
+    public int getNbMaxWaitWithNoOverPeople() {
+        return nbMaxWaitWithNoOverPeople;
+    }
+
+    public int getNbMaxWaitWithOverPeople() {
+        return nbMaxWaitWithOverPeople;
+    }
+
+    public int getPeopleInElevatorForOverFlow() {
+        return peopleInElevatorForOverFlow;
     }
 }
