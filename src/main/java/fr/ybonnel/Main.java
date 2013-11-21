@@ -39,7 +39,7 @@ public class Main {
             new UpAndDownWithDirectionElevator(),
             new AlzheimerElevator(),
             new OptimizedAlzheimerElevator(),
-            new ByUserElevator(1, 1, 50)
+            new ByUserElevator()
     };
 
     public static String getFullURL(HttpServletRequest request) {
@@ -76,7 +76,7 @@ public class Main {
         for (Elevator elevator : elevators) {
             new ElevatorService("/" + elevator.getClass().getSimpleName(), elevator).registerRoutes();
         }
-        new ElevatorService("/elevator", new OptimizedAlzheimerElevator()).registerRoutes();
+        new ElevatorService("/elevator", new ByUserElevator()).registerRoutes();
 
         // Start the server.
         start(waitStop);

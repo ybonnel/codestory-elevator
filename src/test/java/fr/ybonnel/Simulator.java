@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Simulator {
 
@@ -61,10 +63,10 @@ public class Simulator {
         }
 
         for (int i = 0; i < arrivals.get(currentTick % arrivals.size()); i++) {
-            int startFloor = random.nextInt(HIGHER_FLOOR - LOWER_FLOOR + 1) - LOWER_FLOOR;
+            int startFloor = random.nextInt(HIGHER_FLOOR - LOWER_FLOOR + 1) + LOWER_FLOOR;
             int destinationFloor;
             do {
-                destinationFloor = random.nextInt(HIGHER_FLOOR - LOWER_FLOOR + 1) - LOWER_FLOOR;
+                destinationFloor = random.nextInt(HIGHER_FLOOR - LOWER_FLOOR + 1) + LOWER_FLOOR;
             } while (destinationFloor == startFloor);
 
             for (ElevatorWithState elevatorWithState : elevatorWithStates) {
@@ -75,12 +77,10 @@ public class Simulator {
         currentTick++;
     }
 
-    public static List<Elevator> generatorAlzheimerElevators() {
+    public static List<Elevator> generatorByUsersElevators() {
         List<Elevator> elevators = new ArrayList<>();
-        for (int tickBetweenReset = 10; tickBetweenReset <= 16000; tickBetweenReset+=10) {
-            elevators.add(new AlzheimerElevator(
-                    tickBetweenReset
-            ));
+        for (int tickBeforeReset = 100; tickBeforeReset <= 150; tickBeforeReset+=1) {
+             elevators.add(new ByUserElevator(tickBeforeReset));
         }
         return elevators;
     }
@@ -93,10 +93,11 @@ public class Simulator {
 
         Simulator simulator = new Simulator(arrivals,
                 new OptimizedAlzheimerElevator(),
-                new OptimizedAlzheimerElevator(14, 12, 24),
                 new AlzheimerElevator(),
-                new AlzheimerElevator(180),
-                new FastDeliverElevator());
+                new FastDeliverElevator(),
+                new ByUserElevator());
+
+
 
         for (int i=0; i<arrivals.size()*2; i++) {
             simulator.runOneTick();
@@ -111,7 +112,7 @@ public class Simulator {
 
 
 
-        /*List<Elevator> elevators = generatorAlzheimerElevators();
+        /*List<Elevator> elevators = generatorByUsersElevators();
 
         System.out.println(elevators.size());
 
@@ -150,7 +151,7 @@ public class Simulator {
         System.out.println("Elevator "
                 + bestElevator.getName()
                 + " : "
-                + bestElevator.getScore()); */
+                + bestElevator.getScore());*/
 
     }
 

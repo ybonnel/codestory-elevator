@@ -85,7 +85,7 @@ public abstract class CleverElevator implements Elevator {
             lastCommand = getNextCommand();
         }
         if (lastCommand == Command.CLOSE && !peopleActivity) {
-            logger.warn("Strange state : CLOSE the door but no activity of people");
+            //logger.warn("Strange state : CLOSE the door but no activity of people");
             //lastCommand = Command.FORCERESET;
         }
         peopleActivity = false;

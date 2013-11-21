@@ -22,14 +22,12 @@ import java.util.Map;
 
 public class ByUserElevator extends CleverElevator {
 
-    private final int minScoreOnFloor;
-    private final int minScoreOnFloorWithOver;
-    private final int nbPeopleForOver;
+    public ByUserElevator() {
+        setTickBetweenReset(120);
+    }
 
-    public ByUserElevator(int minScoreOnFloor, int minScoreOnFloorWithOver, int nbPeopleForOver) {
-        this.minScoreOnFloor = minScoreOnFloor;
-        this.minScoreOnFloorWithOver = minScoreOnFloorWithOver;
-        this.nbPeopleForOver = nbPeopleForOver;
+    public ByUserElevator(int tickBeforeReset) {
+        setTickBetweenReset(tickBeforeReset);
     }
 
     private int currentTick;
@@ -82,7 +80,7 @@ public class ByUserElevator extends CleverElevator {
                         score += user.esperateScore(currentTick, currentFloor);
                     }
                 }
-                if (score > minScoreOnFloorForCurrentOver()) {
+                if (score > 0) {
                     return true;
                 }
             }
@@ -90,40 +88,45 @@ public class ByUserElevator extends CleverElevator {
         return false;
     }
 
-    private int nbUsersInElevator;
+    private static class PeopleInElevator {
+
+        private PeopleInElevator(int nbUsersInElevator) {
+            this.nbUsersInElevator = nbUsersInElevator;
+        }
+
+        int nbUsersInElevator;
+    }
 
     private int estimateScore(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor) {
         int score = 0;
-        nbUsersInElevator = this.getPeopleInsideElevator();
+        PeopleInElevator peopleInElevator = new PeopleInElevator(getPeopleInsideElevator());
         for (Map.Entry<Integer, LinkedList<User>> usersByFloor : toGoUsers.entrySet()) {
-            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor);
+            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor, peopleInElevator);
         }
         for (Map.Entry<Integer, LinkedList<User>> usersByFloor : waitingUsers.entrySet()) {
-            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor);
+            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor, peopleInElevator);
         }
         return score;
     }
 
-    private int estimateScoreForOneFloor(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor, Map.Entry<Integer, LinkedList<User>> usersByFloor) {
+    private int estimateScoreForOneFloor(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor, Map.Entry<Integer, LinkedList<User>> usersByFloor, PeopleInElevator peopleInElevator) {
         int score = 0;
         if (currentDirection.floorIsOnDirection(currentFloor, usersByFloor.getKey())) {
             if (currentFloor != usersByFloor.getKey() || openOnCurrentFloor) {
                 for (User user : usersByFloor.getValue()) {
                     boolean mustCount = false;
-                    if (user.getDirectionCalled() == currentDirection && user.getDestinationFloor() == null && nbUsersInElevator < getCabinSize()) {
+                    if (user.getDirectionCalled() == currentDirection && user.getDestinationFloor() == null && peopleInElevator.nbUsersInElevator < getCabinSize()) {
                         mustCount = true;
-                        nbUsersInElevator++;
+                        peopleInElevator.nbUsersInElevator++;
                     }
 
                     if (user.getDestinationFloor() != null) {
                         mustCount = true;
-                        nbUsersInElevator--;
+                        peopleInElevator.nbUsersInElevator--;
                     }
                     if (mustCount) {
                         int scoreOfUser = user.esperateScore(currentTick, currentFloor);
-                        if (currentFloor == usersByFloor.getKey()) {
-                            scoreOfUser = scoreOfUser - 1;
-                        } else if (openOnCurrentFloor) {
+                        if (currentFloor != usersByFloor.getKey() && openOnCurrentFloor) {
                             scoreOfUser = scoreOfUser - 2;
                         }
                         if (scoreOfUser > 0) {
@@ -133,14 +136,7 @@ public class ByUserElevator extends CleverElevator {
                 }
             }
         }
-        return score > minScoreOnFloorForCurrentOver() ? score : 0;
-    }
-
-    private int minScoreOnFloorForCurrentOver() {
-        if (getPeopleInsideElevator() > nbPeopleForOver) {
-            return minScoreOnFloorWithOver;
-        }
-        return minScoreOnFloor;
+        return score > 0 ? score : 0;
     }
 
     private boolean hasFloorsToGo() {
@@ -179,21 +175,32 @@ public class ByUserElevator extends CleverElevator {
     public void userHasEntered() {
         super.userHasEntered();
         usersJustEntered.addLast(waitingUsers.get(currentFloor).removeFirst());
+        if (waitingUsers.get(currentFloor).isEmpty()) {
+            waitingUsers.remove(currentFloor);
+        }
     }
 
     @Override
     public void userHasExited() {
         super.userHasExited();
-        currentScore += toGoUsers.get(currentFloor).removeFirst().esperateScore(currentTick, currentFloor);
+        int score = toGoUsers.get(currentFloor).removeFirst().esperateScore(currentTick, currentFloor);
+        if (toGoUsers.get(currentFloor).isEmpty()) {
+            toGoUsers.remove(currentFloor);
+        }
+        currentScore += score;
     }
+
+    private int resetCount = 1;
 
     @Override
     public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
         super.reset(cause, lowerFloor, higherFloor, cabinSize);
         if (cause.startsWith("the elevator is at floor ")) {
             currentScore = 0;
+            resetCount = 1;
         } else {
-            currentScore = currentScore - 10;
+            currentScore = currentScore - 2 * resetCount;
+            resetCount++;
         }
         currentTick = 0;
         toGoUsers.clear();
@@ -206,15 +213,4 @@ public class ByUserElevator extends CleverElevator {
         return currentScore;
     }
 
-    public int getMinScoreOnFloor() {
-        return minScoreOnFloor;
-    }
-
-    public int getMinScoreOnFloorWithOver() {
-        return minScoreOnFloorWithOver;
-    }
-
-    public int getNbPeopleForOver() {
-        return nbPeopleForOver;
-    }
 }

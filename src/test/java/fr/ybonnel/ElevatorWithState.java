@@ -49,7 +49,7 @@ public class ElevatorWithState {
         this.cabinSize = cabinSize;
         this.lowerFloor = lowerFloor;
         this.higherFloor = higherFloor;
-        reset("START");
+        reset("the elevator is at floor ");
     }
 
     public void addUser(int tickEnterBuilding, int startFloor, int destinationFloor) {
@@ -90,7 +90,8 @@ public class ElevatorWithState {
                 User user = iterator.next();
                 if (user.isInElevator()) {
                     if (currentFloor == user.getDestinationFloor()) {
-                        score += user.exitElevatorAndComputeScore(tick);
+                        int scoreOfUser = user.exitElevatorAndComputeScore(tick);
+                        score += scoreOfUser;
                         elevator.userHasExited();
                         iterator.remove();
                     }
@@ -149,7 +150,7 @@ public class ElevatorWithState {
                     + ")";
 
         } else if (elevator instanceof ByUserElevator) {
-            return name + "(" + ((ByUserElevator) elevator).getMinScoreOnFloor()
+            return name + "(" + ((ByUserElevator) elevator).getTickBetweenReset()
                     + " - " + ((ByUserElevator) elevator).getCurrentScore()
                     + ")";
         } else if (elevator instanceof AlzheimerElevator) {
