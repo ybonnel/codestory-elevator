@@ -33,12 +33,17 @@ public class AlzheimerElevator extends UpAndDownWithDirectionElevator {
     }
 
     public AlzheimerElevator() {
-        this(new HashMap<Integer, Integer>() {{
-                 put(1, 14);
-             }},
-                new HashMap<Integer, Integer>() {{
-                    put(1, 12);
-                }}
+        this(new HashMap<Integer, Integer>(){{
+                 put(0, 20);
+                 put(20, 17);
+                 put(40, 17);
+                 put(60, 12);
+             }}, new HashMap<Integer, Integer>(){{
+                 put(0, 23);
+                 put(20, 15);
+                 put(40, 23);
+                 put(60, 23);
+             }}
         );
     }
 
