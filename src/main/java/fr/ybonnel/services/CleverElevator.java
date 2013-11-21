@@ -34,6 +34,15 @@ public abstract class CleverElevator implements Elevator {
 
     private int peopleInsideElevator = 0;
     private int cabinSize = 9999;
+    private int tickBetweenReset = 180;
+
+    public void setTickBetweenReset(int tickBetweenReset) {
+        this.tickBetweenReset = tickBetweenReset;
+    }
+
+    public int getTickBetweenReset() {
+        return tickBetweenReset;
+    }
 
     public int getPeopleInsideElevator() {
         return peopleInsideElevator;
@@ -70,7 +79,7 @@ public abstract class CleverElevator implements Elevator {
     @Override
     public final Command nextCommand() {
         currentTick++;
-        if (mustReset || (peopleInsideElevator >= cabinSize && currentTick - tickOfLastReset > 1000)) {
+        if (mustReset || (peopleInsideElevator >= cabinSize && currentTick - tickOfLastReset > tickBetweenReset)) {
             lastCommand = Command.FORCERESET;
         } else {
             lastCommand = getNextCommand();

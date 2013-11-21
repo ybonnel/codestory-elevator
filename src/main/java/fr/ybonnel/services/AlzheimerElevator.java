@@ -25,15 +25,32 @@ public class AlzheimerElevator extends UpAndDownWithDirectionElevator {
     private final Map<Integer, Integer> nbMaxWaitInElevator;
 
 
-    public AlzheimerElevator(Map<Integer, Integer> nbMaxWait, Map<Integer, Integer> nbMaxWaitInElevator) {
+    public AlzheimerElevator(int ticksBetweenReset, Map<Integer, Integer> nbMaxWait, Map<Integer, Integer> nbMaxWaitInElevator) {
         super(new AlzheimerFloorsByDirection(nbMaxWait, nbMaxWaitInElevator));
         ((AlzheimerFloorsByDirection)getFloorsByDirection()).setElevator(this);
         this.nbMaxWait = nbMaxWait;
         this.nbMaxWaitInElevator = nbMaxWaitInElevator;
+        setTickBetweenReset(ticksBetweenReset);
     }
 
     public AlzheimerElevator() {
-        this(new HashMap<Integer, Integer>(){{
+        this(180, new HashMap<Integer, Integer>(){{
+                 put(0, 20);
+                 put(20, 17);
+                 put(40, 17);
+                 put(60, 12);
+             }}, new HashMap<Integer, Integer>(){{
+                 put(0, 23);
+                 put(20, 15);
+                 put(40, 23);
+                 put(60, 23);
+             }}
+        );
+    }
+
+    public AlzheimerElevator(int ticksBetweenReset) {
+        this(ticksBetweenReset,
+                new HashMap<Integer, Integer>(){{
                  put(0, 20);
                  put(20, 17);
                  put(40, 17);

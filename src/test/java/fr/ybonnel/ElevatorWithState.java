@@ -35,7 +35,8 @@ public class ElevatorWithState {
 
     private List<User> users = new ArrayList<>();
 
-    private int score = 10;
+    private int score = 0;
+    private int nextReset = 0;
     private int currentFloor = 0;
     private State currentState = State.CLOSE;
     private final Elevator elevator;
@@ -120,7 +121,8 @@ public class ElevatorWithState {
     private void reset(String cause) {
         currentFloor = 0;
         currentState = State.CLOSE;
-        score = score - 10;
+        score = score - nextReset;
+        nextReset += 2;
         users.clear();
         elevator.reset(cause, lowerFloor, higherFloor, cabinSize);
     }
@@ -154,6 +156,8 @@ public class ElevatorWithState {
             return name + "(" + ((AlzheimerElevator) elevator).getNbMaxWait()
                     + " - "
                     + ((AlzheimerElevator) elevator).getNbMaxWaitInElevator()
+                    + " - "
+                    + ((AlzheimerElevator) elevator).getTickBetweenReset()
                     + ")";
         }
         return name;

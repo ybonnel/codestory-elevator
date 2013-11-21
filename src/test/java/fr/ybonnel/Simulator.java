@@ -75,69 +75,16 @@ public class Simulator {
         currentTick++;
     }
 
-    public static List<Elevator> generatorOptimizedAlzheimerElevators() {
+    public static List<Elevator> generatorAlzheimerElevators() {
         List<Elevator> elevators = new ArrayList<>();
-        for (int nbMaxWait = 10; nbMaxWait <= 15; nbMaxWait+=1) {
-            for (int nbMaxWaitOver = 5; nbMaxWaitOver <= 15; nbMaxWaitOver+=1) {
-                for (int over = 20; over <= 30; over+=1) {
-                    elevators.add(new OptimizedAlzheimerElevator(
-                            nbMaxWait,
-                            nbMaxWaitOver,
-                            over
-                    ));
-                }
-            }
+        for (int tickBetweenReset = 10; tickBetweenReset <= 16000; tickBetweenReset+=10) {
+            elevators.add(new AlzheimerElevator(
+                    tickBetweenReset
+            ));
         }
         return elevators;
     }
 
-    public static List<Elevator> generateElevators(int currentPeople, Map<Integer, Integer> currentNbMaxWait, Map<Integer, Integer> currentNbMaxWaitElevator) {
-        if (currentPeople > CABIN_SIZE) {
-            return Arrays.asList((Elevator)new AlzheimerElevator(currentNbMaxWait, currentNbMaxWaitElevator));
-        } else {
-            List<Elevator> elevators = new ArrayList<>();
-            int minNbMaxWait = currentPeople <= 10
-                    ? 18
-                    : currentPeople <= 30
-                    ? 13
-                    : currentPeople <= 50
-                    ? 13
-                    : 8;
-            int maxNbMaxWait = currentPeople <= 10
-                    ? 22
-                    : currentPeople <= 30
-                    ? 17
-                    : currentPeople <= 50
-                    ? 17
-                    : 12;
-            int minNbMaxWaitInElevator = currentPeople <= 10
-                    ? 23
-                    : currentPeople <= 30
-                    ? 13
-                    : currentPeople <= 50
-                    ? 23
-                    : 23;
-            int maxNbMaxWaitInElevator = currentPeople <= 10
-                    ? 27
-                    : currentPeople <= 30
-                    ? 17
-                    : currentPeople <= 50
-                    ? 27
-                    : 27;
-
-            for (int nbMaxWait = minNbMaxWait; nbMaxWait<= maxNbMaxWait; nbMaxWait = nbMaxWait + 2) {
-                for (int nbMaxWaitInElevator = minNbMaxWaitInElevator; nbMaxWaitInElevator<= maxNbMaxWaitInElevator; nbMaxWaitInElevator = nbMaxWaitInElevator + 2) {
-                    Map<Integer, Integer> nbMaxWaits = new HashMap<>(currentNbMaxWait);
-                    nbMaxWaits.put(currentPeople, nbMaxWait);
-                    Map<Integer, Integer> nbMaxWaitInElevators = new HashMap<>(currentNbMaxWaitElevator);
-                    nbMaxWaitInElevators.put(currentPeople, nbMaxWaitInElevator);
-                    elevators.addAll(generateElevators(currentPeople + 20, nbMaxWaits, nbMaxWaitInElevators));
-                }
-            }
-            System.out.println("" + currentPeople + " - " + elevators.size());
-            return elevators;
-        }
-    }
 
     public static void main(String[] args) {
         List<Integer> arrivals = new GsonBuilder().create().fromJson(
@@ -148,6 +95,7 @@ public class Simulator {
                 new OptimizedAlzheimerElevator(),
                 new OptimizedAlzheimerElevator(14, 12, 24),
                 new AlzheimerElevator(),
+                new AlzheimerElevator(180),
                 new FastDeliverElevator());
 
         for (int i=0; i<arrivals.size()*2; i++) {
@@ -163,77 +111,32 @@ public class Simulator {
 
 
 
-        /*List<Elevator> elevators = generatorOptimizedAlzheimerElevators();
+        /*List<Elevator> elevators = generatorAlzheimerElevators();
 
         System.out.println(elevators.size());
 
         simulator = new Simulator(arrivals, elevators.toArray(new Elevator[elevators.size()]));
 
-        for (int i=0; i<arrivals.size(); i++) {
+        for (int i=0; i<arrivals.size() * 2; i++) {
             if (i%1000 == 0) {
                 System.out.println(i);
             }
             simulator.runOneTick();
         }
 
+        Collections.sort(simulator.elevatorWithStates,
+                new Comparator<ElevatorWithState>() {
+                    @Override
+                    public int compare(ElevatorWithState o1, ElevatorWithState o2) {
+                        return new Integer(o2.getScore()).compareTo(o1.getScore());
+                    }
+                });
+
+
+
         int bestScore = 0;
         ElevatorWithState bestElevator = null;
-
-        Collections.sort(simulator.elevatorWithStates,
-                new Comparator<ElevatorWithState>() {
-                    @Override
-                    public int compare(ElevatorWithState o1, ElevatorWithState o2) {
-                        return new Integer(o2.getScore()).compareTo(o1.getScore());
-                    }
-                });
-
-        elevators.clear();
-
-        for (ElevatorWithState elevatorWithState : simulator.elevatorWithStates.subList(0, 100)) {
-            OptimizedAlzheimerElevator oldElevator = (OptimizedAlzheimerElevator) elevatorWithState.getElevator();
-            elevators.add(new OptimizedAlzheimerElevator(oldElevator.getNbMaxWaitWithNoOverPeople(), oldElevator.getNbMaxWaitWithOverPeople(), oldElevator.getPeopleInElevatorForOverFlow()));
-        }
-
-
-        simulator = new Simulator(arrivals, elevators.toArray(new Elevator[elevators.size()]));
-
-
-        for (int i=0; i<arrivals.size()*10; i++) {
-            if (i%10000 == 0) {
-                System.out.println(i);
-            }
-            simulator.runOneTick();
-        }
-
-
-        Collections.sort(simulator.elevatorWithStates,
-                new Comparator<ElevatorWithState>() {
-                    @Override
-                    public int compare(ElevatorWithState o1, ElevatorWithState o2) {
-                        return new Integer(o2.getScore()).compareTo(o1.getScore());
-                    }
-                });
-
-
-        elevators.clear();
-
         for (ElevatorWithState elevatorWithState : simulator.elevatorWithStates.subList(0, 10)) {
-            OptimizedAlzheimerElevator oldElevator = (OptimizedAlzheimerElevator) elevatorWithState.getElevator();
-            elevators.add(new OptimizedAlzheimerElevator(oldElevator.getNbMaxWaitWithNoOverPeople(), oldElevator.getNbMaxWaitWithOverPeople(), oldElevator.getPeopleInElevatorForOverFlow()));
-        }
-
-        simulator = new Simulator(arrivals, elevators.toArray(new Elevator[elevators.size()]));
-
-
-        for (int i=0; i<arrivals.size()*100; i++) {
-            if (i%100000 == 0) {
-                System.out.println(i);
-            }
-            simulator.runOneTick();
-        }
-
-
-        for (ElevatorWithState elevatorWithState : simulator.elevatorWithStates) {
             System.out.println("Elevator "
                     + elevatorWithState.getName()
                     + " : "
