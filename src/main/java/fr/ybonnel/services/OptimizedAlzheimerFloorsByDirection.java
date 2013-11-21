@@ -16,13 +16,6 @@
  */
 package fr.ybonnel.services;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class OptimizedAlzheimerFloorsByDirection extends AlzheimerFloorsByDirection {
 
     private final int nbMaxWaitWithNoOverPeople;
@@ -31,6 +24,7 @@ public class OptimizedAlzheimerFloorsByDirection extends AlzheimerFloorsByDirect
     private OptimizedAlzheimerElevator elevator;
 
     public OptimizedAlzheimerFloorsByDirection(int nbMaxWaitWithNoOverPeople, int nbMaxWaitWithOverPeople, int peopleInElevatorForOverFlow) {
+        super(null, null);
         this.nbMaxWaitWithNoOverPeople = nbMaxWaitWithNoOverPeople;
         this.nbMaxWaitWithOverPeople = nbMaxWaitWithOverPeople;
         this.peopleInElevatorForOverFlow = peopleInElevatorForOverFlow;
@@ -41,6 +35,11 @@ public class OptimizedAlzheimerFloorsByDirection extends AlzheimerFloorsByDirect
     }
 
     public int getNbMaxWait() {
+        return getNbMaxWaitInElevator() * 2;
+    }
+
+    @Override
+    public int getNbMaxWaitInElevator() {
         if (elevator.getPeopleInsideElevator() > peopleInElevatorForOverFlow) {
             return nbMaxWaitWithOverPeople;
         } else {

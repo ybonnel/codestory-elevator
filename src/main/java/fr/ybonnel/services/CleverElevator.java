@@ -25,6 +25,8 @@ public abstract class CleverElevator implements Elevator {
 
     int currentFloor = 0;
     State currentState = State.CLOSE;
+    int currentTick = 0;
+    int tickOfLastReset = Integer.MIN_VALUE;
     private DescriptiveStatistics statsOfCall = new DescriptiveStatistics(500);
 
     private Integer lowerFloor;
@@ -67,14 +69,15 @@ public abstract class CleverElevator implements Elevator {
 
     @Override
     public final Command nextCommand() {
-        if (mustReset || peopleInsideElevator >= cabinSize) {
+        currentTick++;
+        if (mustReset || (peopleInsideElevator >= cabinSize && currentTick - tickOfLastReset > 1000)) {
             lastCommand = Command.FORCERESET;
         } else {
             lastCommand = getNextCommand();
         }
         if (lastCommand == Command.CLOSE && !peopleActivity) {
             logger.warn("Strange state : CLOSE the door but no activity of people");
-            lastCommand = Command.FORCERESET;
+            //lastCommand = Command.FORCERESET;
         }
         peopleActivity = false;
         return lastCommand;
@@ -142,6 +145,7 @@ public abstract class CleverElevator implements Elevator {
 
     @Override
     public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
+        tickOfLastReset = currentTick;
         mustReset = false;
         currentFloor = 0;
         currentState = State.CLOSE;

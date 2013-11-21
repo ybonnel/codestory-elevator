@@ -16,9 +16,20 @@
  */
 package fr.ybonnel.services;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class AlzheimerFastDeliverFloorsByDirection extends AlzheimerFloorsByDirection {
+
+    public AlzheimerFastDeliverFloorsByDirection() {
+        super(new HashMap<Integer, Integer>() {{
+                  put(1, 14);
+              }},
+                new HashMap<Integer, Integer>() {{
+                    put(1, 12);
+                }}
+        );
+    }
 
     @Override
     public boolean containsFloorForCurrentDirection(int currentFloor, Direction currentDirection, int peopleInElevator, int cabinSize) {

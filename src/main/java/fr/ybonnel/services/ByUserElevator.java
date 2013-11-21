@@ -90,12 +90,15 @@ public class ByUserElevator extends CleverElevator {
         return false;
     }
 
+    private int nbUsersInElevator;
+
     private int estimateScore(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor) {
         int score = 0;
-        for (Map.Entry<Integer, LinkedList<User>> usersByFloor : waitingUsers.entrySet()) {
+        nbUsersInElevator = this.getPeopleInsideElevator();
+        for (Map.Entry<Integer, LinkedList<User>> usersByFloor : toGoUsers.entrySet()) {
             score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor);
         }
-        for (Map.Entry<Integer, LinkedList<User>> usersByFloor : toGoUsers.entrySet()) {
+        for (Map.Entry<Integer, LinkedList<User>> usersByFloor : waitingUsers.entrySet()) {
             score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor);
         }
         return score;
@@ -106,8 +109,17 @@ public class ByUserElevator extends CleverElevator {
         if (currentDirection.floorIsOnDirection(currentFloor, usersByFloor.getKey())) {
             if (currentFloor != usersByFloor.getKey() || openOnCurrentFloor) {
                 for (User user : usersByFloor.getValue()) {
-                    if (user.getDirectionCalled() == currentDirection
-                            || user.getDestinationFloor() != null) {
+                    boolean mustCount = false;
+                    if (user.getDirectionCalled() == currentDirection && user.getDestinationFloor() == null && nbUsersInElevator < getCabinSize()) {
+                        mustCount = true;
+                        nbUsersInElevator++;
+                    }
+
+                    if (user.getDestinationFloor() != null) {
+                        mustCount = true;
+                        nbUsersInElevator--;
+                    }
+                    if (mustCount) {
                         int scoreOfUser = user.esperateScore(currentTick, currentFloor);
                         if (currentFloor == usersByFloor.getKey()) {
                             scoreOfUser = scoreOfUser - 1;

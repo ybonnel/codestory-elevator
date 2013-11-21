@@ -16,9 +16,37 @@
  */
 package fr.ybonnel.services;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class AlzheimerElevator extends UpAndDownWithDirectionElevator {
 
+    private final Map<Integer, Integer> nbMaxWait;
+    private final Map<Integer, Integer> nbMaxWaitInElevator;
+
+
+    public AlzheimerElevator(Map<Integer, Integer> nbMaxWait, Map<Integer, Integer> nbMaxWaitInElevator) {
+        super(new AlzheimerFloorsByDirection(nbMaxWait, nbMaxWaitInElevator));
+        ((AlzheimerFloorsByDirection)getFloorsByDirection()).setElevator(this);
+        this.nbMaxWait = nbMaxWait;
+        this.nbMaxWaitInElevator = nbMaxWaitInElevator;
+    }
+
     public AlzheimerElevator() {
-        super(new AlzheimerFloorsByDirection());
+        this(new HashMap<Integer, Integer>() {{
+                 put(1, 14);
+             }},
+                new HashMap<Integer, Integer>() {{
+                    put(1, 12);
+                }}
+        );
+    }
+
+    public Map<Integer, Integer> getNbMaxWait() {
+        return nbMaxWait;
+    }
+
+    public Map<Integer, Integer> getNbMaxWaitInElevator() {
+        return nbMaxWaitInElevator;
     }
 }

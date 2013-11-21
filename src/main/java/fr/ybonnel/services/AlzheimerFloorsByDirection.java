@@ -23,8 +23,43 @@ import java.util.Set;
 
 public class AlzheimerFloorsByDirection implements IFloorsByDirection {
 
+    private final Map<Integer, Integer> nbMaxWait;
+    private final Map<Integer, Integer> nbMaxWaitInElevator;
+    private CleverElevator elevator;
+
+    public AlzheimerFloorsByDirection(Map<Integer, Integer> nbMaxWait, Map<Integer, Integer> nbMaxWaitInElevator) {
+        this.nbMaxWait = nbMaxWait;
+        this.nbMaxWaitInElevator = nbMaxWaitInElevator;
+    }
+
+
+    public void setElevator(CleverElevator elevator) {
+        this.elevator = elevator;
+    }
+
     public int getNbMaxWait() {
-        return 19;
+
+        int peopleInElevatorNearest = -999;
+
+        for (int peopleInElevator : nbMaxWait.keySet()) {
+            if (Math.abs(peopleInElevator - elevator.getPeopleInsideElevator()) < Math.abs(peopleInElevatorNearest - elevator.getPeopleInsideElevator())) {
+                peopleInElevatorNearest = peopleInElevator;
+            }
+        }
+
+        return nbMaxWait.get(peopleInElevatorNearest);
+    }
+
+    public int getNbMaxWaitInElevator() {
+        int peopleInElevatorNearest = -999;
+
+        for (int peopleInElevator : nbMaxWaitInElevator.keySet()) {
+            if (Math.abs(peopleInElevator - elevator.getPeopleInsideElevator()) < Math.abs(peopleInElevatorNearest - elevator.getPeopleInsideElevator())) {
+                peopleInElevatorNearest = peopleInElevator;
+            }
+        }
+
+        return nbMaxWaitInElevator.get(peopleInElevatorNearest);
     }
 
     public void setLowerFloor(Integer lowerFloor) {
@@ -86,13 +121,13 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
     }
 
     public void addFloorForDirection(int floor, Direction direction) {
-        floorsHasCalled.get(direction).put(floor, getNbMaxWait() * 2);
+        floorsHasCalled.get(direction).put(floor, getNbMaxWait());
     }
 
     public void addFloorToGo(int floor, int currentFloor) {
         int diff = Math.abs(currentFloor - floor);
         Integer lastWaitTime = lastWaitTimeBeforeOpen.containsKey(currentFloor) ? lastWaitTimeBeforeOpen.get(currentFloor) : 0;
-        int wait = getNbMaxWait() + diff - ((getNbMaxWait() * 2 - lastWaitTime) / 2);
+        int wait = getNbMaxWaitInElevator() + diff - ((getNbMaxWait() - lastWaitTime) / 2);
         if (!floorsToGo.containsKey(floor)
                 || floorsToGo.get(floor) < wait) {
             floorsToGo.put(floor, wait);
@@ -116,7 +151,7 @@ public class AlzheimerFloorsByDirection implements IFloorsByDirection {
         Integer waitTimeUp = floorsHasCalled.get(Direction.UP).remove(floor);
         floorsToGo.remove(floor);
         oldFloorsToGo.remove(floor);
-        int waitTime = getNbMaxWait() * 2;
+        int waitTime = getNbMaxWait();
         if (waitTimeDown != null && waitTimeUp != null) {
             waitTime = Math.max(waitTimeDown, waitTimeUp);
         } else if (waitTimeDown != null) {

@@ -93,16 +93,29 @@ public class ElevatorWithState {
                         elevator.userHasExited();
                         iterator.remove();
                     }
-                } else {
-                    if (currentFloor == user.getStartFloor()) {
-                        user.enterElevator(tick);
-                        elevator.userHasEntered();
-                        elevator.go(user.getDestinationFloor());
-                    }
+                }
+            }
+            for (User user : users) {
+                if (currentFloor == user.getStartFloor() && nbUserInElevator() < cabinSize && !user.isInElevator()) {
+                    user.enterElevator(tick);
+                    elevator.userHasEntered();
+                    elevator.go(user.getDestinationFloor());
                 }
             }
         }
     }
+
+    private int nbUserInElevator() {
+        int nbUsersInElevator = 0;
+
+        for (User user : users) {
+            if (user.isInElevator()) {
+                nbUsersInElevator++;
+            }
+        }
+        return nbUsersInElevator;
+    }
+
 
     private void reset(String cause) {
         currentFloor = 0;
@@ -136,6 +149,11 @@ public class ElevatorWithState {
         } else if (elevator instanceof ByUserElevator) {
             return name + "(" + ((ByUserElevator) elevator).getMinScoreOnFloor()
                     + " - " + ((ByUserElevator) elevator).getCurrentScore()
+                    + ")";
+        } else if (elevator instanceof AlzheimerElevator) {
+            return name + "(" + ((AlzheimerElevator) elevator).getNbMaxWait()
+                    + " - "
+                    + ((AlzheimerElevator) elevator).getNbMaxWaitInElevator()
                     + ")";
         }
         return name;

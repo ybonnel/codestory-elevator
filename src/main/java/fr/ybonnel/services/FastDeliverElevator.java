@@ -25,6 +25,7 @@ public class FastDeliverElevator extends UpAndDownWithDirectionElevator {
 
     public FastDeliverElevator() {
         super(new AlzheimerFastDeliverFloorsByDirection());
+        ((AlzheimerFastDeliverFloorsByDirection)getFloorsByDirection()).setElevator(this);
     }
 
     private int currentTick = -1;
