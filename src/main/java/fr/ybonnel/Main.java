@@ -10,6 +10,7 @@ import fr.ybonnel.services.Omnibus;
 import fr.ybonnel.services.OptimizedAlzheimerElevator;
 import fr.ybonnel.services.UpAndDownWithDirectionElevator;
 import fr.ybonnel.simpleweb4j.exception.HttpErrorException;
+import fr.ybonnel.simpleweb4j.handlers.Response;
 import fr.ybonnel.simpleweb4j.handlers.Route;
 import fr.ybonnel.simpleweb4j.handlers.RouteParameters;
 import fr.ybonnel.simpleweb4j.handlers.filter.AbstractFilter;
@@ -22,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 import static fr.ybonnel.simpleweb4j.SimpleWeb4j.*;
 
@@ -76,7 +78,34 @@ public class Main {
         for (Elevator elevator : elevators) {
             new ElevatorService("/" + elevator.getClass().getSimpleName(), elevator).registerRoutes();
         }
-        new ElevatorService("/elevator", new ByUserElevator()).registerRoutes();
+        final ByUserElevator elevator = new ByUserElevator();
+        new ElevatorService("/elevator", elevator).registerRoutes();
+
+        get(new Route<Void, List<Integer>>("/stats", Void.class) {
+
+            @Override
+            public Response<List<Integer>> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                return new Response<>(elevator.getPeopleByTick());
+            }
+        });
+        get(new Route<Void, Integer>("currenttick", Void.class) {
+            @Override
+            public Response<Integer> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                return new Response<>(elevator.getCurrentTick());
+            }
+        });
+        get(new Route<Void, Integer>("currentscore", Void.class) {
+            @Override
+            public Response<Integer> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                return new Response<>(elevator.getCurrentScore());
+            }
+        });
+        get(new Route<Void, Integer>("resetcount", Void.class) {
+            @Override
+            public Response<Integer> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                return new Response<>(elevator.getResetCount());
+            }
+        });
 
         // Start the server.
         start(waitStop);

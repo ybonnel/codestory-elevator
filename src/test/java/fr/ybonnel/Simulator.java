@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Simulator {
@@ -79,8 +80,8 @@ public class Simulator {
 
     public static List<Elevator> generatorByUsersElevators() {
         List<Elevator> elevators = new ArrayList<>();
-        for (int tickBeforeReset = 100; tickBeforeReset <= 150; tickBeforeReset+=1) {
-             elevators.add(new ByUserElevator(tickBeforeReset));
+        for (int tickBeforeReset = 100; tickBeforeReset <= 150; tickBeforeReset++) {
+            elevators.add(new ByUserElevator(tickBeforeReset));
         }
         return elevators;
     }
@@ -91,7 +92,7 @@ public class Simulator {
                 new InputStreamReader(Simulator.class.getResourceAsStream("/repartition.json")),
                 new TypeToken<List<Integer>>(){}.getType());
 
-        Simulator simulator = new Simulator(arrivals,
+        /*Simulator simulator = new Simulator(arrivals,
                 new OptimizedAlzheimerElevator(),
                 new AlzheimerElevator(),
                 new FastDeliverElevator(),
@@ -108,19 +109,22 @@ public class Simulator {
                     + elevatorWithState.getName()
                     + " : "
                     + elevatorWithState.getScore());
-        }
+        }*/
 
 
 
-        /*List<Elevator> elevators = generatorByUsersElevators();
+        List<Elevator> elevators = generatorByUsersElevators();
 
         System.out.println(elevators.size());
 
-        simulator = new Simulator(arrivals, elevators.toArray(new Elevator[elevators.size()]));
+        Simulator simulator = new Simulator(arrivals, elevators.toArray(new Elevator[elevators.size()]));
 
-        for (int i=0; i<arrivals.size() * 2; i++) {
+        long startTime = System.nanoTime();
+
+        for (int i=0; i<arrivals.size() * 4; i++) {
             if (i%1000 == 0) {
                 System.out.println(i);
+                System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
             }
             simulator.runOneTick();
         }
@@ -151,7 +155,7 @@ public class Simulator {
         System.out.println("Elevator "
                 + bestElevator.getName()
                 + " : "
-                + bestElevator.getScore());*/
+                + bestElevator.getScore());
 
     }
 

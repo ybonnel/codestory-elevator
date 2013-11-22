@@ -146,21 +146,5 @@ public class ElevatorService {
         get(getGoRoute());
         get(getUserHasEnteredRoute());
         get(getUserHasExitedRoute());
-        if (elevator instanceof FastDeliverElevator) {
-            get(new Route<Void, List<Integer>>("/stats", Void.class) {
-                @Override
-                public Response<List<Integer>> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
-
-                    return new Response<>(((FastDeliverElevator) elevator).getPeopleByTick());
-                }
-            });
-            get(new Route<Void, Integer>("/currenttick", Void.class){
-
-                @Override
-                public Response<Integer> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
-                    return new Response<>(((FastDeliverElevator) elevator).getCurrentTick());
-                }
-            });
-        }
     }
 }

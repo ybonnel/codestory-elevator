@@ -16,21 +16,31 @@
  */
 package fr.ybonnel.services;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class ByUserElevator extends CleverElevator {
 
+
+    private List<Integer> peopleByTick = new ArrayList<>(Collections.nCopies(16000, 0));
+
+    public List<Integer> getPeopleByTick() {
+        return peopleByTick;
+    }
+
     public ByUserElevator() {
-        setTickBetweenReset(120);
+        this(120);
     }
 
     public ByUserElevator(int tickBeforeReset) {
         setTickBetweenReset(tickBeforeReset);
     }
 
-    private int currentTick;
+    private int currentTick = -1;
     private int currentScore;
     private Direction currentDirection = Direction.UP;
 
@@ -88,6 +98,14 @@ public class ByUserElevator extends CleverElevator {
         return false;
     }
 
+    public int getCurrentTick() {
+        return currentTick;
+    }
+
+    public int getResetCount() {
+        return resetCount;
+    }
+
     private static class PeopleInElevator {
 
         private PeopleInElevator(int nbUsersInElevator) {
@@ -101,60 +119,58 @@ public class ByUserElevator extends CleverElevator {
         int score = 0;
         PeopleInElevator peopleInElevator = new PeopleInElevator(getPeopleInsideElevator());
         for (Map.Entry<Integer, LinkedList<User>> usersByFloor : toGoUsers.entrySet()) {
-            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor, peopleInElevator);
+            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor.getKey(), usersByFloor.getValue(), peopleInElevator);
         }
         for (Map.Entry<Integer, LinkedList<User>> usersByFloor : waitingUsers.entrySet()) {
-            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor, peopleInElevator);
+            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor.getKey(), usersByFloor.getValue(), peopleInElevator);
         }
         return score;
     }
 
-    private int estimateScoreForOneFloor(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor, Map.Entry<Integer, LinkedList<User>> usersByFloor, PeopleInElevator peopleInElevator) {
+    private int estimateScoreForOneFloor(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor, int floorOfUser, LinkedList<User> users, PeopleInElevator peopleInElevator) {
         int score = 0;
-        if (currentDirection.floorIsOnDirection(currentFloor, usersByFloor.getKey())) {
-            if (currentFloor != usersByFloor.getKey() || openOnCurrentFloor) {
-                for (User user : usersByFloor.getValue()) {
-                    boolean mustCount = false;
-                    if (user.getDirectionCalled() == currentDirection && user.getDestinationFloor() == null && peopleInElevator.nbUsersInElevator < getCabinSize()) {
-                        mustCount = true;
-                        peopleInElevator.nbUsersInElevator++;
-                    }
-
-                    if (user.getDestinationFloor() != null) {
-                        mustCount = true;
-                        peopleInElevator.nbUsersInElevator--;
-                    }
-                    if (mustCount) {
-                        int scoreOfUser = user.esperateScore(currentTick, currentFloor);
-                        if (currentFloor != usersByFloor.getKey() && openOnCurrentFloor) {
-                            scoreOfUser = scoreOfUser - 2;
-                        }
-                        if (scoreOfUser > 0) {
-                            score += scoreOfUser;
-                        }
-                    }
+        if (currentDirection.floorIsOnDirection(currentFloor, floorOfUser)) {
+            if (currentFloor != floorOfUser || openOnCurrentFloor) {
+                for (User user : users) {
+                    score = estimateScoreOfOneUser(currentFloor, currentDirection, openOnCurrentFloor, floorOfUser, peopleInElevator, score, user);
                 }
             }
         }
         return score > 0 ? score : 0;
     }
 
+    private int estimateScoreOfOneUser(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor, int floorOfUser, PeopleInElevator peopleInElevator, int score, User user) {
+        boolean mustCount = false;
+        if (user.getDirectionCalled() == currentDirection && user.getDestinationFloor() == null && peopleInElevator.nbUsersInElevator < getCabinSize()) {
+            mustCount = true;
+            peopleInElevator.nbUsersInElevator++;
+        }
+
+        if (user.getDestinationFloor() != null) {
+            mustCount = true;
+            peopleInElevator.nbUsersInElevator--;
+        }
+        if (mustCount) {
+            int scoreOfUser = user.esperateScore(currentTick, currentFloor);
+            if (currentFloor != floorOfUser && openOnCurrentFloor) {
+                scoreOfUser = scoreOfUser - 2;
+            }
+            if (scoreOfUser > 0) {
+                score += scoreOfUser;
+            }
+        }
+        return score;
+    }
+
     private boolean hasFloorsToGo() {
-        for (LinkedList<User> users : waitingUsers.values()) {
-            if (!users.isEmpty()) {
-                return true;
-            }
-        }
-        for (LinkedList<User> users : toGoUsers.values()) {
-            if (!users.isEmpty()) {
-                return true;
-            }
-        }
-        return false;
+        return !waitingUsers.isEmpty() || !toGoUsers.isEmpty();
     }
 
     @Override
     protected void addCall(int floor, String to) {
+        if (currentTick >= 0 && currentTick < 16000) {
+            peopleByTick.set(currentTick, peopleByTick.get(currentTick)+1);
+        }
         if (!waitingUsers.containsKey(floor)) {
             waitingUsers.put(floor, new LinkedList<User>());
         }
@@ -198,11 +214,12 @@ public class ByUserElevator extends CleverElevator {
         if (cause.startsWith("the elevator is at floor ")) {
             currentScore = 0;
             resetCount = 1;
+            currentTick = -1;
+            peopleByTick = new ArrayList<>(Collections.nCopies(16000, 0));
         } else {
             currentScore = currentScore - 2 * resetCount;
             resetCount++;
         }
-        currentTick = 0;
         toGoUsers.clear();
         waitingUsers.clear();
         usersJustEntered.clear();

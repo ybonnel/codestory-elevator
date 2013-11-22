@@ -17,9 +17,6 @@
 package fr.ybonnel.services;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.rank.Median;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class CleverElevator implements Elevator {
 
@@ -59,7 +56,7 @@ public abstract class CleverElevator implements Elevator {
         return 0;
     }
 
-    public Integer getHigherFloor() {
+    public int getHigherFloor() {
         if (higherFloor != null) {
             return higherFloor;
         }
@@ -71,15 +68,18 @@ public abstract class CleverElevator implements Elevator {
     protected Command lastCommand;
 
     protected CleverElevator() {
-        logger = LoggerFactory.getLogger(getClass());
     }
 
-    private final Logger logger;
+    protected boolean canForceReset() {
+        return true;
+    }
 
     @Override
     public final Command nextCommand() {
         currentTick++;
-        if (mustReset || (peopleInsideElevator >= cabinSize && currentTick - tickOfLastReset > tickBetweenReset)) {
+        if (mustReset || (peopleInsideElevator >= cabinSize
+                && getTicksSinceLastReset() > tickBetweenReset
+                && canForceReset())) {
             lastCommand = Command.FORCERESET;
         } else {
             lastCommand = getNextCommand();
@@ -90,6 +90,10 @@ public abstract class CleverElevator implements Elevator {
         }
         peopleActivity = false;
         return lastCommand;
+    }
+
+    protected int getTicksSinceLastReset() {
+        return currentTick - tickOfLastReset;
     }
 
     protected abstract Command getNextCommand();
