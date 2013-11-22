@@ -69,6 +69,8 @@ public class ByUserElevator extends CleverElevator {
                     scoreIfNoOpen = estimateScore(currentFloor, currentDirection, false);
                     if (scoreIfOpen > scoreIfNoOpen) {
                         return openIfCan();
+                    } else if (scoreIfNoOpen == 0) {
+                        return goToBestFloorToWait();
                     }
                 }
 
@@ -163,7 +165,17 @@ public class ByUserElevator extends CleverElevator {
     }
 
     private boolean hasFloorsToGo() {
-        return !waitingUsers.isEmpty() || !toGoUsers.isEmpty();
+        if (waitingUsers.isEmpty() && toGoUsers.isEmpty()) {
+            return false;
+        }
+        /*int possibleScores = estimateScore(currentFloor, currentDirection, true);
+        possibleScores += estimateScore(currentFloor, currentDirection, false);
+
+        possibleScores += estimateScore(currentFloor, currentDirection.getOtherDirection(), true);
+        possibleScores += estimateScore(currentFloor, currentDirection.getOtherDirection(), false);
+
+        return possibleScores > 0;*/
+        return true;
     }
 
     @Override
