@@ -10,6 +10,7 @@ import fr.ybonnel.services.Omnibus;
 import fr.ybonnel.services.OptimizedAlzheimerElevator;
 import fr.ybonnel.services.UpAndDownWithDirectionElevator;
 import fr.ybonnel.simpleweb4j.exception.HttpErrorException;
+import fr.ybonnel.simpleweb4j.handlers.ContentType;
 import fr.ybonnel.simpleweb4j.handlers.Response;
 import fr.ybonnel.simpleweb4j.handlers.Route;
 import fr.ybonnel.simpleweb4j.handlers.RouteParameters;
@@ -88,22 +89,14 @@ public class Main {
                 return new Response<>(elevator.getPeopleByTick());
             }
         });
-        get(new Route<Void, Integer>("currenttick", Void.class) {
+        get(new Route<Void, String>("status", Void.class, ContentType.PLAIN_TEXT) {
             @Override
-            public Response<Integer> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
-                return new Response<>(elevator.getCurrentTick());
-            }
-        });
-        get(new Route<Void, Integer>("currentscore", Void.class) {
-            @Override
-            public Response<Integer> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
-                return new Response<>(elevator.getCurrentScore());
-            }
-        });
-        get(new Route<Void, Integer>("resetcount", Void.class) {
-            @Override
-            public Response<Integer> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
-                return new Response<>(elevator.getResetCount());
+            public Response<String> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
+                StringBuilder result = new StringBuilder();
+                result.append("currenttick : ").append(elevator.getCurrentTick()).append('\n');
+                result.append("currentscore : ").append(elevator.getCurrentScore()).append('\n');
+                result.append("resetCount : ").append(elevator.getResetCount()).append('\n');
+                return new Response<>(result.toString());
             }
         });
 
