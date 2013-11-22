@@ -96,6 +96,7 @@ public class Main {
                 result.append("currenttick : ").append(elevator.getCurrentTick()).append('\n');
                 result.append("currentscore : ").append(elevator.getCurrentScore()).append('\n');
                 result.append("resetCount : ").append(elevator.getResetCount()).append('\n');
+                result.append("stats : ").append(elevator.getPeopleByTick().subList(0, Math.min(elevator.getCurrentTick() + 1, 160000))).append('\n');
                 return new Response<>(result.toString());
             }
         });
