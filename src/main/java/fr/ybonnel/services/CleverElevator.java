@@ -17,6 +17,8 @@
 package fr.ybonnel.services;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class CleverElevator implements Elevator {
 
@@ -68,11 +70,14 @@ public abstract class CleverElevator implements Elevator {
     protected Command lastCommand;
 
     protected CleverElevator() {
+        logger = LoggerFactory.getLogger(getClass());
     }
 
     protected boolean canForceReset() {
         return true;
     }
+
+    private final Logger logger;
 
     @Override
     public final Command nextCommand() {
@@ -84,9 +89,10 @@ public abstract class CleverElevator implements Elevator {
         } else {
             lastCommand = getNextCommand();
         }
-        if (lastCommand == Command.CLOSE && !peopleActivity) {
-            //logger.warn("Strange state : CLOSE the door but no activity of people");
-            //lastCommand = Command.FORCERESET;
+        if (lastCommand == Command.CLOSE && !peopleActivity
+                && peopleInsideElevator < cabinSize) {
+            logger.warn("Strange state : CLOSE the door but no activity of people");
+            lastCommand = Command.FORCERESET;
         }
         peopleActivity = false;
         return lastCommand;
