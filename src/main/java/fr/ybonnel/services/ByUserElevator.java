@@ -109,7 +109,13 @@ public class ByUserElevator extends CleverElevator {
                         && peopleInsideElevator < cabinSize
                         && waitingUsers.containsKey(currentFloor)) {
                     logger.warn("Strange state : CLOSE the door but no activity of people");
-                    return Command.FORCERESET;
+                    if (currentTick < 100) {
+                        // Premier ticks, sans doute un problème de synchro au démarrage
+                        return Command.FORCERESET;
+                    }
+                    // Bizare, on supprime les users qui devait bouger.
+                    waitingUsers.remove(currentFloor);
+                    toGoUsers.remove(currentFloor);
                 }
                 return close();
             } else {
