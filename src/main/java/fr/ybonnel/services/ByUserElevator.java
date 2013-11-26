@@ -81,7 +81,8 @@ public class ByUserElevator extends CleverElevator {
         for (Map.Entry<Integer, LinkedList<User>> entries : waitingUsers.entrySet()) {
             if (currentDirection.floorIsOnDirection(currentFloor, entries.getKey())) {
                 for (User user : entries.getValue()) {
-                    if (user.esperateScore(currentTick, entries.getKey()) > 0) {
+                    if ((currentFloor != entries.getKey()
+                        || currentDirection == user.getDirectionCalled()) && user.esperateScore(currentTick, entries.getKey()) > 0) {
                         return true;
                     }
                 }
