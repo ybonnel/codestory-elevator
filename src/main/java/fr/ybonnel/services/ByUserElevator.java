@@ -45,7 +45,7 @@ public class ByUserElevator extends CleverElevator {
         builder.append("currentFloor(").append(currentFloor).append("),");
         builder.append("currentDirection(").append(currentDirection).append("),");
         builder.append("toGoUsers(").append(toGoUsers).append("),");
-        builder.append("peopleInsideElevator(").append(peopleInsideElevator).append("),");
+        builder.append("peopleInsideElevator(").append(peopleInsideElevator).append(")");
         return builder.toString();
     }
 

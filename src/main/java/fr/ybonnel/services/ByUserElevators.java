@@ -75,7 +75,7 @@ public class ByUserElevators implements Elevators {
         boolean mustChangeDirectionToBetterScore = true;
         boolean hasScore = false;
         for (ByUserElevator elevator : elevators) {
-            if (!elevator.hasUsersWithScores() || elevator.hasUsersForCurrentDirection()) {
+            if (elevator.hasUsersForCurrentDirection()) {
                 mustChangeDirectionToBetterScore = false;
             }
             if (elevator.hasUsersWithScores()) {
@@ -84,7 +84,7 @@ public class ByUserElevators implements Elevators {
         }
 
 
-        if ((allElevatorsWaiting && !hasScore) || mustChangeDirectionToBetterScore) {
+        if ((allElevatorsWaiting && !hasScore) || (mustChangeDirectionToBetterScore && hasScore)) {
             for (ByUserElevator elevator : elevators) {
                 elevator.currentDirection = elevator.currentDirection.getOtherDirection();
             }
