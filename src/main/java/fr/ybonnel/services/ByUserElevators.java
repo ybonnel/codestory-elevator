@@ -85,6 +85,7 @@ public class ByUserElevators implements Elevators {
 
 
         if ((allElevatorsWaiting && !hasScore) || (mustChangeDirectionToBetterScore && hasScore)) {
+            logger.info("Change direction : allElevatorsWaiting({}), hasScore({}), mustChangeDirectionToBetterScore({})", allElevatorsWaiting, hasScore, mustChangeDirectionToBetterScore);
             for (ByUserElevator elevator : elevators) {
                 elevator.currentDirection = elevator.currentDirection.getOtherDirection();
             }
