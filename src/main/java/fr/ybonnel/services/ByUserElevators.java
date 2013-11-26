@@ -59,17 +59,6 @@ public class ByUserElevators implements Elevators {
         }
         currentTick++;
 
-        boolean allElevatorsWaiting = true;
-        for (Iterator<ByUserElevator> iterator = elevators.iterator(); iterator.hasNext() && allElevatorsWaiting; ) {
-            ByUserElevator elevator = iterator.next();
-            if (elevator.currentDirection == Direction.UP
-                    && !(elevator.currentFloor == elevator.higherFloor)
-                    || elevator.currentDirection == Direction.DOWN
-                    && !(elevator.currentFloor == elevator.lowerFloor)) {
-                allElevatorsWaiting = false;
-            }
-        }
-
 
 
         boolean mustChangeDirectionToBetterScore = true;
@@ -84,8 +73,8 @@ public class ByUserElevators implements Elevators {
         }
 
 
-        if ((allElevatorsWaiting && !hasScore) || (mustChangeDirectionToBetterScore && hasScore)) {
-            logger.info("Change direction : allElevatorsWaiting({}), hasScore({}), mustChangeDirectionToBetterScore({})", allElevatorsWaiting, hasScore, mustChangeDirectionToBetterScore);
+        if (mustChangeDirectionToBetterScore && hasScore) {
+            logger.info("Change direction : hasScore({}), mustChangeDirectionToBetterScore({})", hasScore, mustChangeDirectionToBetterScore);
             for (ByUserElevator elevator : elevators) {
                 elevator.currentDirection = elevator.currentDirection.getOtherDirection();
             }
