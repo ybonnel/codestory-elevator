@@ -242,6 +242,9 @@ public class ByUserElevator extends CleverElevator {
     @Override
     public void userHasExited() {
         super.userHasExited();
+        if (!toGoUsers.containsKey(currentFloor)) {
+            return;
+        }
         int score = toGoUsers.get(currentFloor).removeFirst().esperateScore(currentTick, currentFloor);
         if (toGoUsers.get(currentFloor).isEmpty()) {
             toGoUsers.remove(currentFloor);
