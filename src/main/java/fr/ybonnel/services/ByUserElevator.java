@@ -19,20 +19,26 @@ package fr.ybonnel.services;
 import fr.ybonnel.services.model.Command;
 import fr.ybonnel.services.model.Direction;
 import fr.ybonnel.services.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
 public class ByUserElevator extends CleverElevator {
 
-    public ByUserElevator(Map<Integer, LinkedList<User>> waitingUsers) {
+    private static final Logger logger = LoggerFactory.getLogger(ByUserElevator.class);
+
+    public ByUserElevator(Map<Integer, LinkedList<User>> waitingUsers, Direction currentDirection) {
         this.waitingUsers = waitingUsers;
+        this.currentDirection = currentDirection;
     }
 
     private int currentTick = -1;
     private int currentScore;
-    private Direction currentDirection = Direction.UP;
+    protected Direction currentDirection;
 
     private Map<Integer, LinkedList<User>> waitingUsers = new HashMap<>();
     private Map<Integer, LinkedList<User>> toGoUsers = new HashMap<>();
@@ -44,6 +50,12 @@ public class ByUserElevator extends CleverElevator {
         currentTick++;
         if (hasFloorsToGo()) {
             if (isOpen()) {
+                if (!peopleActivity
+                        && peopleInsideElevator < cabinSize
+                        && waitingUsers.containsKey(currentFloor)) {
+                    logger.warn("Strange state : CLOSE the door but no activity of people");
+                    return Command.FORCERESET;
+                }
                 return close();
             } else {
                 int scoreIfOpen = estimateScore(currentFloor, currentDirection, true);
@@ -53,15 +65,8 @@ public class ByUserElevator extends CleverElevator {
                     return openIfCan();
                 }
 
-                if (scoreIfNoOpen == 0 && !mustGoTakeForOtherDirection()) {
-                    currentDirection = currentDirection.getOtherDirection();
-                    scoreIfOpen = estimateScore(currentFloor, currentDirection, true);
-                    scoreIfNoOpen = estimateScore(currentFloor, currentDirection, false);
-                    if (scoreIfOpen > scoreIfNoOpen) {
-                        return openIfCan();
-                    } else if (scoreIfNoOpen == 0) {
-                        return goToBestFloorToWait();
-                    }
+                if (scoreIfNoOpen == 0) {
+                    return goToBestFloorToWait();
                 }
 
                 currentFloor += currentDirection.incForCurrentFloor;
@@ -70,24 +75,6 @@ public class ByUserElevator extends CleverElevator {
         } else {
             return goToBestFloorToWait();
         }
-    }
-
-    private boolean mustGoTakeForOtherDirection() {
-        for (Map.Entry<Integer, LinkedList<User>> usersByFloor : waitingUsers.entrySet()) {
-            if (currentFloor != usersByFloor.getKey()
-                    && currentDirection.floorIsOnDirection(currentFloor, usersByFloor.getKey())) {
-                int score = 0;
-                for (User user : usersByFloor.getValue()) {
-                    if (user.getDirectionCalled() == currentDirection.getOtherDirection()) {
-                        score += user.esperateScore(currentTick, currentFloor);
-                    }
-                }
-                if (score > 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     public int getCurrentTick() {
@@ -169,9 +156,29 @@ public class ByUserElevator extends CleverElevator {
     }
 
     @Override
+    int getBestFloorToWait() {
+        return currentDirection == Direction.UP ? higherFloor : lowerFloor;
+    }
+
+
+    @Override
+    Command getOpenForCurrentDirection() {
+        return currentDirection == Direction.UP ? Command.OPEN_UP : Command.OPEN_DOWN;
+    }
+
+    @Override
     public void userHasEntered() {
         super.userHasEntered();
-        usersJustEntered.addLast(waitingUsers.get(currentFloor).removeFirst());
+        Iterator<User> itUsers = waitingUsers.get(currentFloor).iterator();
+        boolean userFound = false;
+        while (itUsers.hasNext() && !userFound) {
+            User user = itUsers.next();
+            if (user.getDirectionCalled() == currentDirection) {
+                usersJustEntered.addLast(user);
+                itUsers.remove();
+                userFound = true;
+            }
+        }
         if (waitingUsers.get(currentFloor).isEmpty()) {
             waitingUsers.remove(currentFloor);
         }
@@ -190,8 +197,8 @@ public class ByUserElevator extends CleverElevator {
     private int resetCount = 1;
 
     @Override
-    public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
-        super.reset(cause, lowerFloor, higherFloor, cabinSize);
+    public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize, Direction currentDirection) {
+        super.reset(cause, lowerFloor, higherFloor, cabinSize, currentDirection);
         if (cause.startsWith("all elevators are at floor")) {
             currentScore = 0;
             resetCount = 1;
@@ -200,9 +207,9 @@ public class ByUserElevator extends CleverElevator {
             currentScore = currentScore - 2 * resetCount;
             resetCount++;
         }
+        this.currentDirection = currentDirection;
         toGoUsers.clear();
         usersJustEntered.clear();
-        currentDirection = Direction.UP;
     }
 
     public int getCurrentScore() {

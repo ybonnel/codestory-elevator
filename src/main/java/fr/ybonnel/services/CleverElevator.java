@@ -17,12 +17,10 @@
 package fr.ybonnel.services;
 
 import fr.ybonnel.services.model.Command;
+import fr.ybonnel.services.model.Direction;
 import fr.ybonnel.services.model.State;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public abstract class CleverElevator implements Elevator {
+public abstract class CleverElevator {
 
     protected int currentFloor = 0;
     State currentState = State.CLOSE;
@@ -32,24 +30,27 @@ public abstract class CleverElevator implements Elevator {
 
     protected int peopleInsideElevator = 0;
     protected int cabinSize = 9999;
+    protected boolean peopleActivity = false;
 
-    @Override
     public final Command nextCommand() {
-        return getNextCommand();
+        Command command = getNextCommand();
+        peopleActivity = false;
+        return command;
     }
 
     protected abstract Command getNextCommand();
 
+    abstract Command getOpenForCurrentDirection();
+
     protected Command openIfCan() {
         if (isClose()) {
             currentState = State.OPEN;
-            return Command.OPEN;
+            return getOpenForCurrentDirection();
         } else {
             return Command.NOTHING;
         }
     }
 
-    @Override
     public void go(int floorToGo) {
         if (floorToGo >= lowerFloor && floorToGo <= higherFloor) {
             addGo(floorToGo);
@@ -58,9 +59,7 @@ public abstract class CleverElevator implements Elevator {
 
     protected abstract void addGo(int floorToGo);
 
-    private int getBestFloorToWait() {
-        return (higherFloor + lowerFloor) / 2;
-    }
+    abstract int getBestFloorToWait();
 
     protected Command goToBestFloorToWait() {
         if (isOpen()) {
@@ -78,8 +77,7 @@ public abstract class CleverElevator implements Elevator {
         return Command.NOTHING;
     }
 
-    @Override
-    public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
+    public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize, Direction currentDirection) {
         currentFloor = 0;
         currentState = State.CLOSE;
         this.lowerFloor = lowerFloor;
@@ -101,13 +99,13 @@ public abstract class CleverElevator implements Elevator {
         return Command.CLOSE;
     }
 
-    @Override
     public void userHasEntered() {
         peopleInsideElevator++;
+        peopleActivity = true;
     }
 
-    @Override
     public void userHasExited() {
         peopleInsideElevator--;
+        peopleActivity = true;
     }
 }

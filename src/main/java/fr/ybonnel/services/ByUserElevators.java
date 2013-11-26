@@ -54,6 +54,21 @@ public class ByUserElevators implements Elevators {
         }
         currentTick++;
 
+        boolean allElevatorsWaiting = true;
+        for (ByUserElevator elevator : elevators) {
+            if (elevator.currentDirection == Direction.UP
+                    && !(elevator.currentFloor == elevator.higherFloor)
+                    || elevator.currentDirection == Direction.DOWN
+                    && !(elevator.currentFloor == elevator.lowerFloor)) {
+                allElevatorsWaiting = false;
+            }
+        }
+        if (allElevatorsWaiting) {
+            for (ByUserElevator elevator : elevators) {
+                elevator.currentDirection = elevator.currentDirection.getOtherDirection();
+            }
+        }
+
         List<Command> commands = new ArrayList<>();
         for (ByUserElevator elevator : elevators) {
             commands.add(elevator.nextCommand());
@@ -91,10 +106,12 @@ public class ByUserElevators implements Elevators {
     public void reset(String cause, int lowerFloor, int higherFloor, int cabinSize, int cabinCount) {
         mustReset = false;
         waitingUsers.clear();
+        Direction direction = Direction.DOWN;
         if (cabinCount != elevators.size()) {
             elevators.clear();
             for (int cabinIndex = 0; cabinIndex < cabinCount; cabinIndex++) {
-                elevators.add(new ByUserElevator(waitingUsers));
+                elevators.add(new ByUserElevator(waitingUsers, direction));
+                direction = direction.getOtherDirection();
             }
         }
 
@@ -104,7 +121,8 @@ public class ByUserElevators implements Elevators {
         }
 
         for (ByUserElevator elevator : elevators) {
-            elevator.reset(cause, lowerFloor, higherFloor, cabinSize);
+            elevator.reset(cause, lowerFloor, higherFloor, cabinSize, direction);
+            direction = direction.getOtherDirection();
         }
     }
 }

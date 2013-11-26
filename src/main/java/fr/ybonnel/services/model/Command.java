@@ -19,7 +19,8 @@ package fr.ybonnel.services.model;
 public enum Command {
     UP,
     DOWN,
-    OPEN,
+    OPEN_DOWN,
+    OPEN_UP,
     CLOSE,
     NOTHING,
     FORCERESET
