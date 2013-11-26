@@ -45,6 +45,46 @@ public class ByUserElevator extends CleverElevator {
 
     private LinkedList<User> usersJustEntered = new LinkedList<>();
 
+    public boolean hasUsersWithScores() {
+        for (Map.Entry<Integer, LinkedList<User>> entries : waitingUsers.entrySet()) {
+            for (User user : entries.getValue()) {
+                if (user.esperateScore(currentTick, entries.getKey()) > 0) {
+                    return true;
+                }
+            }
+        }
+        for (Map.Entry<Integer, LinkedList<User>> entries : toGoUsers.entrySet()) {
+            for (User user : entries.getValue()) {
+                if (user.esperateScore(currentTick, entries.getKey()) > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean hasUsersForCurrentDirection() {
+        for (Map.Entry<Integer, LinkedList<User>> entries : waitingUsers.entrySet()) {
+            if (currentDirection.floorIsOnDirection(currentFloor, entries.getKey())) {
+                for (User user : entries.getValue()) {
+                    if (user.getDirectionCalled() == currentDirection && user.esperateScore(currentTick, entries.getKey()) > 0) {
+                        return true;
+                    }
+                }
+            }
+        }
+        for (Map.Entry<Integer, LinkedList<User>> entries : toGoUsers.entrySet()) {
+            if (currentDirection.floorIsOnDirection(currentFloor, entries.getKey())) {
+                for (User user : entries.getValue()) {
+                    if (user.esperateScore(currentTick, entries.getKey()) > 0) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     protected Command getNextCommand() {
         currentTick++;

@@ -16,7 +16,6 @@
  */
 package fr.ybonnel;
 
-import fr.ybonnel.services.Elevator;
 import fr.ybonnel.services.model.Command;
 import fr.ybonnel.services.model.State;
 
@@ -27,19 +26,19 @@ import java.util.List;
 public class ElevatorWithState {
 
 
-    private List<User> users = new ArrayList<>();
+    private List<fr.ybonnel.User> users = new ArrayList<>();
 
     private int score = 0;
     private int nextReset = 0;
     private int currentFloor = 0;
     private State currentState = State.CLOSE;
-    private final Elevator elevator;
+    //private final Elevator elevator;
     private final int cabinSize;
     private final int lowerFloor;
     private final int higherFloor;
 
-    public ElevatorWithState(Elevator elevator, int lowerFloor, int higherFloor, int cabinSize) {
-        this.elevator = elevator;
+    public ElevatorWithState(/*Elevator elevator, */int lowerFloor, int higherFloor, int cabinSize) {
+        //this.elevator = elevator;
         this.cabinSize = cabinSize;
         this.lowerFloor = lowerFloor;
         this.higherFloor = higherFloor;
@@ -53,7 +52,7 @@ public class ElevatorWithState {
     }
 
     public void oneTick(int tick) {
-        Command command = elevator.nextCommand();
+        Command command = Command.CLOSE;//elevator.nextCommand();
         if (command != Command.CLOSE && currentState == State.OPEN
                 || command == Command.CLOSE && currentState != State.OPEN
                 || command == Command.UP && currentFloor == higherFloor
@@ -61,9 +60,9 @@ public class ElevatorWithState {
             reset("Incompatible command");
         } else {
             switch (command) {
-                case OPEN:
+                /*case OPEN:
                     currentState = State.OPEN;
-                    break;
+                    break;*/
                 case CLOSE:
                     currentState = State.CLOSE;
                     break;
@@ -87,7 +86,7 @@ public class ElevatorWithState {
                     if (currentFloor == user.getDestinationFloor()) {
                         int scoreOfUser = user.exitElevatorAndComputeScore(tick);
                         score += scoreOfUser;
-                        elevator.userHasExited();
+                        //elevator.userHasExited();
                         iterator.remove();
                     }
                 }
@@ -95,8 +94,8 @@ public class ElevatorWithState {
             for (User user : users) {
                 if (currentFloor == user.getStartFloor() && nbUserInElevator() < cabinSize && !user.isInElevator()) {
                     user.enterElevator(tick);
-                    elevator.userHasEntered();
-                    elevator.go(user.getDestinationFloor());
+                    /*elevator.userHasEntered();
+                    elevator.go(user.getDestinationFloor());*/
                 }
             }
         }
@@ -120,7 +119,7 @@ public class ElevatorWithState {
         score = score - nextReset;
         nextReset += 2;
         users.clear();
-        elevator.reset(cause, lowerFloor, higherFloor, cabinSize);
+        //elevator.reset(cause, lowerFloor, higherFloor, cabinSize);
     }
 
     public int getScore() {
@@ -128,6 +127,6 @@ public class ElevatorWithState {
     }
 
     public String getName() {
-        return elevator.getClass().getSimpleName();
+        return "tutu";//return elevator.getClass().getSimpleName();
     }
 }

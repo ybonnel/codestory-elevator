@@ -18,7 +18,6 @@ package fr.ybonnel;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import fr.ybonnel.services.Elevator;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -38,12 +37,12 @@ public class Simulator {
     private List<ElevatorWithState> elevatorWithStates = new ArrayList<>();
     private final List<Integer> arrivals;
 
-    public Simulator(List<Integer> arrivals, Elevator ... elevators) {
+    public Simulator(List<Integer> arrivals/*, Elevator ... elevators*/) {
         this.arrivals = arrivals;
         random = new Random();
-        for (Elevator elevator : elevators) {
+        /*for (Elevator elevator : elevators) {
             elevatorWithStates.add(new ElevatorWithState(elevator, LOWER_FLOOR, HIGHER_FLOOR, CABIN_SIZE));
-        }
+        }*/
     }
 
     private void runOneTick() {

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,11 @@ public class ByUserElevators implements Elevators {
         currentTick++;
 
         boolean allElevatorsWaiting = true;
-        for (ByUserElevator elevator : elevators) {
+        for (Iterator<ByUserElevator> iterator = elevators.iterator(); iterator.hasNext() && allElevatorsWaiting; ) {
+            ByUserElevator elevator = iterator.next();
+            if (elevator.hasUsersWithScores()) {
+                allElevatorsWaiting = false;
+            }
             if (elevator.currentDirection == Direction.UP
                     && !(elevator.currentFloor == elevator.higherFloor)
                     || elevator.currentDirection == Direction.DOWN
@@ -63,7 +68,18 @@ public class ByUserElevators implements Elevators {
                 allElevatorsWaiting = false;
             }
         }
-        if (allElevatorsWaiting) {
+
+
+
+        boolean mustChangeDirectionToBetterScore = true;
+        for (ByUserElevator elevator : elevators) {
+            if (!elevator.hasUsersWithScores() || elevator.hasUsersForCurrentDirection()) {
+                mustChangeDirectionToBetterScore = false;
+            }
+        }
+
+
+        if (allElevatorsWaiting || mustChangeDirectionToBetterScore) {
             for (ByUserElevator elevator : elevators) {
                 elevator.currentDirection = elevator.currentDirection.getOtherDirection();
             }
