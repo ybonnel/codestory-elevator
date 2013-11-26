@@ -40,6 +40,15 @@ public class ByUserElevator extends CleverElevator {
     private int currentScore;
     protected Direction currentDirection;
 
+    public String state() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("currentFloor(").append(currentFloor).append("),");
+        builder.append("currentDirection(").append(currentDirection).append("),");
+        builder.append("toGoUsers(").append(toGoUsers).append("),");
+        builder.append("peopleInsideElevator(").append(peopleInsideElevator).append("),");
+        return builder.toString();
+    }
+
     private Map<Integer, LinkedList<User>> waitingUsers = new HashMap<>();
     private Map<Integer, LinkedList<User>> toGoUsers = new HashMap<>();
 

@@ -20,6 +20,8 @@ import fr.ybonnel.services.model.Command;
 import fr.ybonnel.services.model.Commands;
 import fr.ybonnel.services.model.Direction;
 import fr.ybonnel.services.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +47,8 @@ public class ByUserElevators implements Elevators {
         return elevators;
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(ByUserElevators.class);
+
     private int currentTick = -1;
     private boolean mustReset = true;
 
@@ -58,9 +62,6 @@ public class ByUserElevators implements Elevators {
         boolean allElevatorsWaiting = true;
         for (Iterator<ByUserElevator> iterator = elevators.iterator(); iterator.hasNext() && allElevatorsWaiting; ) {
             ByUserElevator elevator = iterator.next();
-            if (elevator.hasUsersWithScores()) {
-                allElevatorsWaiting = false;
-            }
             if (elevator.currentDirection == Direction.UP
                     && !(elevator.currentFloor == elevator.higherFloor)
                     || elevator.currentDirection == Direction.DOWN
@@ -72,21 +73,28 @@ public class ByUserElevators implements Elevators {
 
 
         boolean mustChangeDirectionToBetterScore = true;
+        boolean hasScore = false;
         for (ByUserElevator elevator : elevators) {
             if (!elevator.hasUsersWithScores() || elevator.hasUsersForCurrentDirection()) {
                 mustChangeDirectionToBetterScore = false;
             }
+            if (elevator.hasUsersWithScores()) {
+                hasScore = true;
+            }
         }
 
 
-        if (allElevatorsWaiting || mustChangeDirectionToBetterScore) {
+        if ((allElevatorsWaiting && !hasScore) || mustChangeDirectionToBetterScore) {
             for (ByUserElevator elevator : elevators) {
                 elevator.currentDirection = elevator.currentDirection.getOtherDirection();
             }
         }
 
         List<Command> commands = new ArrayList<>();
+        logger.info("Waiting users : {}", waitingUsers);
+        int index = 0;
         for (ByUserElevator elevator : elevators) {
+            logger.info("Elevator {} : {}", index++, elevator.state());
             commands.add(elevator.nextCommand());
         }
         return new Commands(commands);
