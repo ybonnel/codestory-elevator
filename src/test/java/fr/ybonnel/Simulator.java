@@ -18,24 +18,12 @@ package fr.ybonnel;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import fr.ybonnel.services.AlzheimerElevator;
-import fr.ybonnel.services.ByUserElevator;
 import fr.ybonnel.services.Elevator;
-import fr.ybonnel.services.FastDeliverElevator;
-import fr.ybonnel.services.OptimizedAlzheimerElevator;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Simulator {
 
@@ -78,13 +66,6 @@ public class Simulator {
         currentTick++;
     }
 
-    public static List<Elevator> generatorByUsersElevators() {
-        List<Elevator> elevators = new ArrayList<>();
-        for (int tickBeforeReset = 100; tickBeforeReset <= 150; tickBeforeReset++) {
-            elevators.add(new ByUserElevator(tickBeforeReset));
-        }
-        return elevators;
-    }
 
 
     public static void main(String[] args) {
@@ -113,49 +94,7 @@ public class Simulator {
 
 
 
-        List<Elevator> elevators = generatorByUsersElevators();
 
-        System.out.println(elevators.size());
-
-        Simulator simulator = new Simulator(arrivals, elevators.toArray(new Elevator[elevators.size()]));
-
-        long startTime = System.nanoTime();
-
-        for (int i=0; i<arrivals.size() * 4; i++) {
-            if (i%1000 == 0) {
-                System.out.println(i);
-                System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
-            }
-            simulator.runOneTick();
-        }
-
-        Collections.sort(simulator.elevatorWithStates,
-                new Comparator<ElevatorWithState>() {
-                    @Override
-                    public int compare(ElevatorWithState o1, ElevatorWithState o2) {
-                        return new Integer(o2.getScore()).compareTo(o1.getScore());
-                    }
-                });
-
-
-
-        int bestScore = 0;
-        ElevatorWithState bestElevator = null;
-        for (ElevatorWithState elevatorWithState : simulator.elevatorWithStates.subList(0, 10)) {
-            System.out.println("Elevator "
-                    + elevatorWithState.getName()
-                    + " : "
-                    + elevatorWithState.getScore());
-            if (bestScore < elevatorWithState.getScore()) {
-                bestElevator = elevatorWithState;
-                bestScore = elevatorWithState.getScore();
-            }
-        }
-
-        System.out.println("Elevator "
-                + bestElevator.getName()
-                + " : "
-                + bestElevator.getScore());
 
     }
 

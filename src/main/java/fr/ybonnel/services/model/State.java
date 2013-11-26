@@ -14,17 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.ybonnel.services;
+package fr.ybonnel.services.model;
 
-import fr.ybonnel.services.model.Command;
-
-public interface Elevator {
-
-    Command nextCommand();
-    void go(int floorToGo);
-    void userHasEntered();
-    void userHasExited();
-    void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize);
-
-
+public enum State {
+    OPEN,
+    CLOSE
 }

@@ -16,7 +16,16 @@
  */
 package fr.ybonnel.services;
 
-public enum State {
-    OPEN,
-    CLOSE
+import fr.ybonnel.services.model.Commands;
+
+public interface Elevators {
+
+    Commands nextCommands();
+    void call(int floor, String to);
+    void go(int cabin, int floorToGo);
+    void userHasEntered(int cabin);
+    void userHasExited(int cabin);
+    void reset(String cause, int lowerFloor, int higherFloor, int cabinSize, int cabinCount);
+
+
 }

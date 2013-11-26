@@ -16,90 +16,26 @@
  */
 package fr.ybonnel.services;
 
+import fr.ybonnel.services.model.Command;
+import fr.ybonnel.services.model.State;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class CleverElevator implements Elevator {
 
-    int currentFloor = 0;
+    protected int currentFloor = 0;
     State currentState = State.CLOSE;
-    int currentTick = 0;
-    int tickOfLastReset = Integer.MIN_VALUE;
-    private DescriptiveStatistics statsOfCall = new DescriptiveStatistics(500);
 
-    private Integer lowerFloor;
-    private Integer higherFloor;
+    protected int lowerFloor;
+    protected int higherFloor;
 
-    private int peopleInsideElevator = 0;
-    private int cabinSize = 9999;
-    private int tickBetweenReset = 180;
-
-    public void setTickBetweenReset(int tickBetweenReset) {
-        this.tickBetweenReset = tickBetweenReset;
-    }
-
-    public int getTickBetweenReset() {
-        return tickBetweenReset;
-    }
-
-    public int getPeopleInsideElevator() {
-        return peopleInsideElevator;
-    }
-
-    public int getCabinSize() {
-        return cabinSize;
-    }
-
-    public int getLowerFloor() {
-        if (lowerFloor != null) {
-            return lowerFloor;
-        }
-        return 0;
-    }
-
-    public int getHigherFloor() {
-        if (higherFloor != null) {
-            return higherFloor;
-        }
-        return 19;
-    }
-
-    private boolean mustReset = true;
-
-    protected Command lastCommand;
-
-    protected CleverElevator() {
-        logger = LoggerFactory.getLogger(getClass());
-    }
-
-    protected boolean canForceReset() {
-        return true;
-    }
-
-    private final Logger logger;
+    protected int peopleInsideElevator = 0;
+    protected int cabinSize = 9999;
 
     @Override
     public final Command nextCommand() {
-        currentTick++;
-        if (mustReset || (peopleInsideElevator >= cabinSize
-                && getTicksSinceLastReset() > tickBetweenReset
-                && canForceReset())) {
-            lastCommand = Command.FORCERESET;
-        } else {
-            lastCommand = getNextCommand();
-        }
-        if (lastCommand == Command.CLOSE && !peopleActivity
-                && peopleInsideElevator < cabinSize) {
-            logger.warn("Strange state : CLOSE the door but no activity of people");
-            lastCommand = Command.FORCERESET;
-        }
-        peopleActivity = false;
-        return lastCommand;
-    }
-
-    protected int getTicksSinceLastReset() {
-        return currentTick - tickOfLastReset;
+        return getNextCommand();
     }
 
     protected abstract Command getNextCommand();
@@ -114,36 +50,16 @@ public abstract class CleverElevator implements Elevator {
     }
 
     @Override
-    public final void call(int floor, String to) {
-        if (floor < getLowerFloor() || floor > getHigherFloor()) {
-            return;
-        }
-        addCallToMap(floor);
-        addCall(floor, to);
-    }
-
-    protected abstract void addCall(int floor, String to);
-
-    @Override
     public void go(int floorToGo) {
-        if (floorToGo >= getLowerFloor() && floorToGo <= getHigherFloor()) {
+        if (floorToGo >= lowerFloor && floorToGo <= higherFloor) {
             addGo(floorToGo);
         }
     }
 
     protected abstract void addGo(int floorToGo);
 
-
-    private void addCallToMap(int floor) {
-        statsOfCall.addValue(floor);
-    }
-
     private int getBestFloorToWait() {
-        if (statsOfCall.getN() > 0) {
-            return (int) Math.round(statsOfCall.getMean());
-        } else {
-            return 0;
-        }
+        return (higherFloor + lowerFloor) / 2;
     }
 
     protected Command goToBestFloorToWait() {
@@ -164,19 +80,12 @@ public abstract class CleverElevator implements Elevator {
 
     @Override
     public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
-        tickOfLastReset = currentTick;
-        mustReset = false;
         currentFloor = 0;
         currentState = State.CLOSE;
-        statsOfCall.clear();
-        int mid = (getHigherFloor() + getLowerFloor()) / 2;
-        for (int i=0; i < 20; i++) {
-            statsOfCall.addValue(mid);
-        }
         this.lowerFloor = lowerFloor;
         this.higherFloor = higherFloor;
         peopleInsideElevator = 0;
-        this.cabinSize = cabinSize == null ? 9999 : cabinSize;
+        this.cabinSize = cabinSize;
     }
 
     protected boolean isOpen() {
@@ -192,17 +101,13 @@ public abstract class CleverElevator implements Elevator {
         return Command.CLOSE;
     }
 
-    private boolean peopleActivity = false;
-
     @Override
     public void userHasEntered() {
         peopleInsideElevator++;
-        peopleActivity = true;
     }
 
     @Override
     public void userHasExited() {
         peopleInsideElevator--;
-        peopleActivity = true;
     }
 }

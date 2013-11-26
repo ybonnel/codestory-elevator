@@ -16,15 +16,9 @@
  */
 package fr.ybonnel;
 
-import fr.ybonnel.services.AlzheimerElevator;
-import fr.ybonnel.services.AlzheimerFloorsByDirection;
-import fr.ybonnel.services.ByUserElevator;
-import fr.ybonnel.services.Command;
 import fr.ybonnel.services.Elevator;
-import fr.ybonnel.services.OptimizedAlzheimerElevator;
-import fr.ybonnel.services.OptimizedAlzheimerFloorsByDirection;
-import fr.ybonnel.services.State;
-import fr.ybonnel.services.UpAndDownWithDirectionElevator;
+import fr.ybonnel.services.model.Command;
+import fr.ybonnel.services.model.State;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -54,7 +48,8 @@ public class ElevatorWithState {
 
     public void addUser(int tickEnterBuilding, int startFloor, int destinationFloor) {
         users.add(new User(tickEnterBuilding, startFloor, destinationFloor));
-        elevator.call(startFloor, destinationFloor > startFloor ? "UP" : "DOWN");
+        // TODO fix
+        //elevator.call(startFloor, destinationFloor > startFloor ? "UP" : "DOWN");
     }
 
     public void oneTick(int tick) {
@@ -128,39 +123,11 @@ public class ElevatorWithState {
         elevator.reset(cause, lowerFloor, higherFloor, cabinSize);
     }
 
-
-    public Elevator getElevator() {
-        return elevator;
-    }
-
     public int getScore() {
         return score;
     }
 
     public String getName() {
-        String name = elevator.getClass().getSimpleName();
-        if (elevator instanceof OptimizedAlzheimerElevator) {
-            int nbMaxWaitWithNoOverPeople = ((OptimizedAlzheimerElevator) elevator).getNbMaxWaitWithNoOverPeople();
-            int nbMaxWaitWithOverPeople = ((OptimizedAlzheimerElevator) elevator).getNbMaxWaitWithOverPeople();
-            int peopleInElevatorForOverFlow = ((OptimizedAlzheimerElevator) elevator).getPeopleInElevatorForOverFlow();
-
-            return name + "(" + nbMaxWaitWithNoOverPeople
-                    + " - " + nbMaxWaitWithOverPeople
-                    + " - " + peopleInElevatorForOverFlow
-                    + ")";
-
-        } else if (elevator instanceof ByUserElevator) {
-            return name + "(" + ((ByUserElevator) elevator).getTickBetweenReset()
-                    + " - " + ((ByUserElevator) elevator).getCurrentScore()
-                    + ")";
-        } else if (elevator instanceof AlzheimerElevator) {
-            return name + "(" + ((AlzheimerElevator) elevator).getNbMaxWait()
-                    + " - "
-                    + ((AlzheimerElevator) elevator).getNbMaxWaitInElevator()
-                    + " - "
-                    + ((AlzheimerElevator) elevator).getTickBetweenReset()
-                    + ")";
-        }
-        return name;
+        return elevator.getClass().getSimpleName();
     }
 }

@@ -16,28 +16,18 @@
  */
 package fr.ybonnel.services;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import fr.ybonnel.services.model.Command;
+import fr.ybonnel.services.model.Direction;
+import fr.ybonnel.services.model.User;
+
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 public class ByUserElevator extends CleverElevator {
 
-
-    private List<Integer> peopleByTick = new ArrayList<>(Collections.nCopies(16000, 0));
-
-    public List<Integer> getPeopleByTick() {
-        return peopleByTick;
-    }
-
-    public ByUserElevator() {
-        this(120);
-    }
-
-    public ByUserElevator(int tickBeforeReset) {
-        setTickBetweenReset(tickBeforeReset);
+    public ByUserElevator(Map<Integer, LinkedList<User>> waitingUsers) {
+        this.waitingUsers = waitingUsers;
     }
 
     private int currentTick = -1;
@@ -119,7 +109,7 @@ public class ByUserElevator extends CleverElevator {
 
     private int estimateScore(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor) {
         int score = 0;
-        PeopleInElevator peopleInElevator = new PeopleInElevator(getPeopleInsideElevator());
+        PeopleInElevator peopleInElevator = new PeopleInElevator(peopleInsideElevator);
         for (Map.Entry<Integer, LinkedList<User>> usersByFloor : toGoUsers.entrySet()) {
             score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor.getKey(), usersByFloor.getValue(), peopleInElevator);
         }
@@ -143,7 +133,7 @@ public class ByUserElevator extends CleverElevator {
 
     private int estimateScoreOfOneUser(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor, int floorOfUser, PeopleInElevator peopleInElevator, int score, User user) {
         boolean mustCount = false;
-        if (user.getDirectionCalled() == currentDirection && user.getDestinationFloor() == null && peopleInElevator.nbUsersInElevator < getCabinSize()) {
+        if (user.getDirectionCalled() == currentDirection && user.getDestinationFloor() == null && peopleInElevator.nbUsersInElevator < cabinSize) {
             mustCount = true;
             peopleInElevator.nbUsersInElevator++;
         }
@@ -165,28 +155,7 @@ public class ByUserElevator extends CleverElevator {
     }
 
     private boolean hasFloorsToGo() {
-        if (waitingUsers.isEmpty() && toGoUsers.isEmpty()) {
-            return false;
-        }
-        /*int possibleScores = estimateScore(currentFloor, currentDirection, true);
-        possibleScores += estimateScore(currentFloor, currentDirection, false);
-
-        possibleScores += estimateScore(currentFloor, currentDirection.getOtherDirection(), true);
-        possibleScores += estimateScore(currentFloor, currentDirection.getOtherDirection(), false);
-
-        return possibleScores > 0;*/
-        return true;
-    }
-
-    @Override
-    protected void addCall(int floor, String to) {
-        if (currentTick >= 0 && currentTick < 16000) {
-            peopleByTick.set(currentTick, peopleByTick.get(currentTick)+1);
-        }
-        if (!waitingUsers.containsKey(floor)) {
-            waitingUsers.put(floor, new LinkedList<User>());
-        }
-        waitingUsers.get(floor).addLast(new User(floor, currentTick, Direction.valueOf(to)));
+        return !(waitingUsers.isEmpty() && toGoUsers.isEmpty());
     }
 
     @Override
@@ -223,17 +192,15 @@ public class ByUserElevator extends CleverElevator {
     @Override
     public void reset(String cause, Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
         super.reset(cause, lowerFloor, higherFloor, cabinSize);
-        if (cause.startsWith("the elevator is at floor ")) {
+        if (cause.startsWith("all elevators are at floor")) {
             currentScore = 0;
             resetCount = 1;
             currentTick = -1;
-            peopleByTick = new ArrayList<>(Collections.nCopies(16000, 0));
         } else {
             currentScore = currentScore - 2 * resetCount;
             resetCount++;
         }
         toGoUsers.clear();
-        waitingUsers.clear();
         usersJustEntered.clear();
         currentDirection = Direction.UP;
     }
