@@ -34,7 +34,10 @@ public class Commands {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for (Command command : commands) {
-            builder.append(command).append('\n');
+            if (builder.length() > 0) {
+                builder.append('\n');
+            }
+            builder.append(command);
         }
         return builder.toString();
     }

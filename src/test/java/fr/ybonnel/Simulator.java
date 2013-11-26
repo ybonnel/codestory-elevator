@@ -27,9 +27,9 @@ import java.util.Random;
 
 public class Simulator {
 
-    private static final int LOWER_FLOOR = -13;
-    private static final int HIGHER_FLOOR = 27;
-    private static final int CABIN_SIZE = 60;
+    private static final int LOWER_FLOOR = -5;
+    private static final int HIGHER_FLOOR = 35;
+    private static final int CABIN_SIZE = 20;
 
     private int currentTick = 0;
 
