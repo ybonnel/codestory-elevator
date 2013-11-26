@@ -16,6 +16,10 @@
  */
 package fr.ybonnel.services.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 public class User {
 
     private final int startFloor;
@@ -70,5 +74,23 @@ public class User {
 
     public Integer getDestinationFloor() {
         return destinationFloor;
+    }
+
+    public String state(int currentTick, int floor) {
+        StringBuilder builder = new StringBuilder("User(");
+        builder.append(esperateScore(currentTick, floor));
+        if (destinationFloor == null) {
+            builder.append(',').append(directionCalled);
+        }
+        builder.append(')');
+        return builder.toString();
+    }
+
+    public static List<String> userToState(Collection<User> users, int currentTick, int currentFloor) {
+        List<String> results = new ArrayList<>();
+        for (User user : users) {
+            results.add(user.state(currentTick, currentFloor));
+        }
+        return results;
     }
 }

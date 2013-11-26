@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class ByUserElevator extends CleverElevator {
@@ -44,7 +45,11 @@ public class ByUserElevator extends CleverElevator {
         StringBuilder builder = new StringBuilder();
         builder.append("currentFloor(").append(currentFloor).append("),");
         builder.append("currentDirection(").append(currentDirection).append("),");
-        builder.append("toGoUsers(").append(toGoUsers.keySet()).append("),");
+        Map<Integer, List<String>> toGoUsersString = new HashMap<>();
+        for (Map.Entry<Integer, LinkedList<User>> entry : toGoUsers.entrySet()) {
+            toGoUsersString.put(entry.getKey(), User.userToState(entry.getValue(), currentTick, entry.getKey()));
+        }
+        builder.append("toGoUsers(").append(toGoUsersString).append("),");
         builder.append("peopleInsideElevator(").append(peopleInsideElevator).append(")");
         return builder.toString();
     }
