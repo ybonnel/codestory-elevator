@@ -91,7 +91,7 @@ public class ByUserElevators implements Elevators {
         }
 
         List<Command> commands = new ArrayList<>();
-        logger.info("Waiting users : {}", waitingUsers);
+        logger.info("Waiting users : {}", waitingUsers.keySet());
         int index = 0;
         for (ByUserElevator elevator : elevators) {
             logger.info("Elevator {} : {}", index++, elevator.state());
