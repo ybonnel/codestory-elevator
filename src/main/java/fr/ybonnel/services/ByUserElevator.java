@@ -219,9 +219,41 @@ public class ByUserElevator extends CleverElevator {
     @Override
     int getBestFloorToWait() {
         if (!hasFloorsToGo()) {
-            return (higherFloor + lowerFloor) / 2;
+            return currentDirection == Direction.UP ? higherFloor - ((higherFloor - lowerFloor) / 3)
+                : lowerFloor + ((higherFloor - lowerFloor) / 3);
+        } else {
+            if (currentDirection == Direction.UP) {
+                int maxWaitingFloorWithScore = Integer.MIN_VALUE;
+                for (Map.Entry<Integer, LinkedList<User>> entry : waitingUsers.entrySet()) {
+                    for (User user : entry.getValue()) {
+                        if (user.esperateScore(currentTick, currentFloor) > 0
+                                && entry.getKey() > maxWaitingFloorWithScore) {
+                            maxWaitingFloorWithScore = entry.getKey();
+                        }
+                    }
+                }
+                if (maxWaitingFloorWithScore == Integer.MIN_VALUE) {
+                    return higherFloor - ((higherFloor - lowerFloor) / 3);
+                } else {
+                    return maxWaitingFloorWithScore;
+                }
+            } else {
+                int minWaitingFloorWithScore = Integer.MAX_VALUE;
+                for (Map.Entry<Integer, LinkedList<User>> entry : waitingUsers.entrySet()) {
+                    for (User user : entry.getValue()) {
+                        if (user.esperateScore(currentTick, currentFloor) > 0
+                                && entry.getKey() < minWaitingFloorWithScore) {
+                            minWaitingFloorWithScore = entry.getKey();
+                        }
+                    }
+                }
+                if (minWaitingFloorWithScore == Integer.MAX_VALUE) {
+                    return lowerFloor + ((higherFloor - lowerFloor) / 3);
+                } else {
+                    return minWaitingFloorWithScore;
+                }
+            }
         }
-        return currentDirection == Direction.UP ? higherFloor : lowerFloor;
     }
 
 
