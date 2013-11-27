@@ -203,7 +203,7 @@ public class ByUserElevator extends CleverElevator {
     }
 
     private boolean hasFloorsToGo() {
-        return !(waitingUsers.isEmpty() && toGoUsers.isEmpty());
+        return hasUsersWithScores();
     }
 
     @Override
@@ -218,6 +218,9 @@ public class ByUserElevator extends CleverElevator {
 
     @Override
     int getBestFloorToWait() {
+        if (!hasFloorsToGo()) {
+            return (higherFloor + lowerFloor) / 2;
+        }
         return currentDirection == Direction.UP ? higherFloor : lowerFloor;
     }
 
