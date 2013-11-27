@@ -103,6 +103,9 @@ public class ByUserElevator extends CleverElevator {
     @Override
     protected Command getNextCommand() {
         currentTick++;
+        if (peopleInsideElevator >= cabinSize) {
+            return Command.FORCERESET;
+        }
         if (hasFloorsToGo()) {
             if (isOpen()) {
                 if (!peopleActivity
