@@ -73,7 +73,7 @@ public class Main {
                     builder.append("\tcurrentscore : ").append(elevator.getCurrentScore()).append('\n');
                     builder.append("\tresetCount : ").append(elevator.getResetCount()).append('\n');
                 }
-                builder.append("\nPeopleByTick : ").append("\n").append(elevators.getPeopleByTick());
+                builder.append("\nPeopleByTick : ").append("\n").append(elevators.getPeopleByTick().subList(0, Math.min(elevators.getCurrentTick(), ByUserElevators.MAX_TICK)));
 
                 return new Response<>(builder.toString());
             }

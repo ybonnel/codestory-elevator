@@ -38,7 +38,9 @@ public class ByUserElevators implements Elevators {
     private Map<Integer, LinkedList<User>> waitingUsers = new HashMap<>();
     private List<ByUserElevator> elevators = new ArrayList<>();
 
-    private List<Integer> peopleByTick = new ArrayList<>(Collections.nCopies(16000, 0));
+    public final static int MAX_TICK = 32000;
+
+    private List<Integer> peopleByTick = new ArrayList<>(Collections.nCopies(MAX_TICK, 0));
     private final boolean log;
     private int maxWaitingsMean = 10;
     private int lowerFloor;
@@ -156,7 +158,7 @@ public class ByUserElevators implements Elevators {
 
     @Override
     public void call(int floor, String to) {
-        if (currentTick >= 0 && currentTick < 16000) {
+        if (currentTick >= 0 && currentTick < MAX_TICK) {
             peopleByTick.set(currentTick, peopleByTick.get(currentTick)+1);
         }
         if (!waitingUsers.containsKey(floor)) {
@@ -205,5 +207,9 @@ public class ByUserElevators implements Elevators {
             elevator.reset(cause, lowerFloor, higherFloor, cabinSize, direction);
             direction = direction.getOtherDirection();
         }
+    }
+
+    public int getCurrentTick() {
+        return currentTick;
     }
 }
