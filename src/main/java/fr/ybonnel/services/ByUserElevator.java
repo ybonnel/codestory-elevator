@@ -315,7 +315,7 @@ public class ByUserElevator extends CleverElevator {
             resetCount = 1;
             currentTick = -1;
         } else {
-            currentScore = currentScore - 2 * resetCount;
+            currentScore = currentScore - resetCount;
             resetCount++;
         }
         this.currentDirection = currentDirection;
