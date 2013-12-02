@@ -20,6 +20,7 @@ import fr.ybonnel.services.model.Command;
 import fr.ybonnel.services.model.Commands;
 import fr.ybonnel.services.model.Direction;
 import fr.ybonnel.services.model.User;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,14 @@ public class ByUserElevators implements Elevators {
     private List<ByUserElevator> elevators = new ArrayList<>();
 
     private List<Integer> peopleByTick = new ArrayList<>(Collections.nCopies(16000, 0));
+    private final boolean log;
+    private int maxWaitingsMean = 10;
+    private int lowerFloor;
+    private int higherFlor;
+
+    public int getMaxWaitingsMean() {
+        return maxWaitingsMean;
+    }
 
     public List<Integer> getPeopleByTick() {
         return peopleByTick;
@@ -51,6 +60,31 @@ public class ByUserElevators implements Elevators {
 
     private int currentTick = -1;
     private boolean mustReset = true;
+    private int cabinSize = 30;
+
+    public ByUserElevators() {
+        log = true;
+    }
+
+    public ByUserElevators(boolean log, int maxWaiting) {
+        this.log = log;
+        this.maxWaitingsMean = maxWaiting;
+    }
+
+    @Override
+    public void logState() {
+        if (log) {
+            Map<Integer, List<String>> waitingUsersString = new HashMap<>();
+            for (Map.Entry<Integer, LinkedList<User>> entry : waitingUsers.entrySet()) {
+                waitingUsersString.put(entry.getKey(), User.userToState(entry.getValue(), currentTick, entry.getKey()));
+            }
+            logger.info("Waiting users : {}", waitingUsersString);
+            int index = 0;
+            for (ByUserElevator elevator : elevators) {
+                logger.info("Elevator {} : {}", index++, elevator.state());
+            }
+        }
+    }
 
     @Override
     public Commands nextCommands() {
@@ -58,39 +92,65 @@ public class ByUserElevators implements Elevators {
             return new Commands(Arrays.asList(Command.FORCERESET));
         }
         currentTick++;
+        logState();
 
-
+        DescriptiveStatistics stats = new DescriptiveStatistics();
+        for (int floor = lowerFloor; floor <= higherFlor; floor++) {
+            stats.addValue(waitingUsers.containsKey(floor) ? waitingUsers.get(floor).size() : 0);
+        }
+        if (stats.getMean() > maxWaitingsMean) {
+            return new Commands(Arrays.asList(Command.FORCERESET));
+        }
 
         boolean mustChangeDirectionToBetterScore = true;
         boolean hasScore = false;
+        boolean canDoScore = false;
+
         for (ByUserElevator elevator : elevators) {
-            if (elevator.hasUsersForCurrentDirection()) {
-                mustChangeDirectionToBetterScore = false;
-            }
+            elevator.setHasScore(true);
             if (elevator.hasUsersWithScores()) {
                 hasScore = true;
+            }
+            if (elevator.estimateScore(elevator.getCurrentFloor(), elevator.currentDirection, true) > 0
+                    || elevator.estimateScore(elevator.getCurrentFloor(), elevator.currentDirection, false) > 0
+                    || elevator.estimateScore(elevator.getCurrentFloor(), elevator.currentDirection.getOtherDirection(), true) > 0
+                    || elevator.estimateScore(elevator.getCurrentFloor(), elevator.currentDirection.getOtherDirection(), false) > 0) {
+                canDoScore = true;
+            }
+        }
+        if (!canDoScore) {
+            hasScore = false;
+        }
+
+
+        for (ByUserElevator elevator : elevators) {
+            elevator.setHasScore(hasScore);
+            if (elevator.getPeopleInsideElevator() >= cabinSize) {
+                elevator.setHasScore(false);
+            }
+            if (elevator.hasUsersForCurrentDirection()) {
+                mustChangeDirectionToBetterScore = false;
             }
         }
 
 
         if (mustChangeDirectionToBetterScore && hasScore) {
-            logger.info("Change direction : hasScore({}), mustChangeDirectionToBetterScore({})", hasScore, mustChangeDirectionToBetterScore);
+            if (log) {
+                logger.info("Change direction : hasScore({}), mustChangeDirectionToBetterScore({})", hasScore, mustChangeDirectionToBetterScore);
+            }
             for (ByUserElevator elevator : elevators) {
                 elevator.currentDirection = elevator.currentDirection.getOtherDirection();
             }
         }
 
+
+
         List<Command> commands = new ArrayList<>();
-        Map<Integer, List<String>> waitingUsersString = new HashMap<>();
-        for (Map.Entry<Integer, LinkedList<User>> entry : waitingUsers.entrySet()) {
-            waitingUsersString.put(entry.getKey(), User.userToState(entry.getValue(), currentTick, entry.getKey()));
-        }
-        logger.info("Waiting users : {}", waitingUsersString);
-        int index = 0;
         for (ByUserElevator elevator : elevators) {
-            logger.info("Elevator {} : {}", index++, elevator.state());
             commands.add(elevator.nextCommand());
         }
+
+
         return new Commands(commands);
     }
 
@@ -124,6 +184,9 @@ public class ByUserElevators implements Elevators {
     public void reset(String cause, int lowerFloor, int higherFloor, int cabinSize, int cabinCount) {
         mustReset = false;
         waitingUsers.clear();
+        this.lowerFloor = lowerFloor;
+        this.higherFlor = higherFloor;
+        this.cabinSize = cabinSize;
         Direction direction = Direction.DOWN;
         if (cabinCount != elevators.size()) {
             elevators.clear();

@@ -20,6 +20,7 @@ import fr.ybonnel.services.model.Commands;
 
 public interface Elevators {
 
+    void logState();
     Commands nextCommands();
     void call(int floor, String to);
     void go(int cabin, int floorToGo);

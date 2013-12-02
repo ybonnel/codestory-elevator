@@ -32,6 +32,10 @@ public abstract class CleverElevator {
     protected int cabinSize = 9999;
     protected boolean peopleActivity = false;
 
+    public int getCurrentFloor() {
+        return currentFloor;
+    }
+
     public final Command nextCommand() {
         Command command = getNextCommand();
         peopleActivity = false;
@@ -107,5 +111,9 @@ public abstract class CleverElevator {
     public void userHasExited() {
         peopleInsideElevator--;
         peopleActivity = true;
+    }
+
+    public int getPeopleInsideElevator() {
+        return peopleInsideElevator;
     }
 }

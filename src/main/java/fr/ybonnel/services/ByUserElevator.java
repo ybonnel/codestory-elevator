@@ -31,6 +31,7 @@ import java.util.Map;
 public class ByUserElevator extends CleverElevator {
 
     private static final Logger logger = LoggerFactory.getLogger(ByUserElevator.class);
+    private boolean hasScore = true;
 
     public ByUserElevator(Map<Integer, LinkedList<User>> waitingUsers, Direction currentDirection) {
         this.waitingUsers = waitingUsers;
@@ -62,14 +63,14 @@ public class ByUserElevator extends CleverElevator {
     public boolean hasUsersWithScores() {
         for (Map.Entry<Integer, LinkedList<User>> entries : waitingUsers.entrySet()) {
             for (User user : entries.getValue()) {
-                if (user.esperateScore(currentTick, entries.getKey()) > 0) {
+                if (user.esperateScore(currentTick, entries.getKey()) > 0 || !hasScore) {
                     return true;
                 }
             }
         }
         for (Map.Entry<Integer, LinkedList<User>> entries : toGoUsers.entrySet()) {
             for (User user : entries.getValue()) {
-                if (user.esperateScore(currentTick, entries.getKey()) > 0) {
+                if (user.esperateScore(currentTick, entries.getKey()) > 0 || !hasScore) {
                     return true;
                 }
             }
@@ -82,7 +83,7 @@ public class ByUserElevator extends CleverElevator {
             if (currentDirection.floorIsOnDirection(currentFloor, entries.getKey())) {
                 for (User user : entries.getValue()) {
                     if ((currentFloor != entries.getKey()
-                        || currentDirection == user.getDirectionCalled()) && user.esperateScore(currentTick, entries.getKey()) > 0) {
+                        || currentDirection == user.getDirectionCalled()) && (user.esperateScore(currentTick, entries.getKey()) > 0 || !hasScore)) {
                         return true;
                     }
                 }
@@ -91,7 +92,8 @@ public class ByUserElevator extends CleverElevator {
         for (Map.Entry<Integer, LinkedList<User>> entries : toGoUsers.entrySet()) {
             if (currentDirection.floorIsOnDirection(currentFloor, entries.getKey())) {
                 for (User user : entries.getValue()) {
-                    if (user.esperateScore(currentTick, entries.getKey()) > 0) {
+                    if (user.esperateScore(currentTick, entries.getKey()) > 0
+                            || !hasScore) {
                         return true;
                     }
                 }
@@ -103,9 +105,6 @@ public class ByUserElevator extends CleverElevator {
     @Override
     protected Command getNextCommand() {
         currentTick++;
-        if (peopleInsideElevator >= cabinSize) {
-            return Command.FORCERESET;
-        }
         if (hasFloorsToGo()) {
             if (isOpen()) {
                 if (!peopleActivity
@@ -149,6 +148,10 @@ public class ByUserElevator extends CleverElevator {
         return resetCount;
     }
 
+    public void setHasScore(boolean hasScore) {
+        this.hasScore = hasScore;
+    }
+
     private static class PeopleInElevator {
 
         private PeopleInElevator(int nbUsersInElevator) {
@@ -158,14 +161,18 @@ public class ByUserElevator extends CleverElevator {
         int nbUsersInElevator;
     }
 
-    private int estimateScore(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor) {
+    public int estimateScore(int currentFloor, Direction currentDirection, boolean openOnCurrentFloor) {
         int score = 0;
         PeopleInElevator peopleInElevator = new PeopleInElevator(peopleInsideElevator);
-        for (Map.Entry<Integer, LinkedList<User>> usersByFloor : toGoUsers.entrySet()) {
-            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor.getKey(), usersByFloor.getValue(), peopleInElevator);
-        }
-        for (Map.Entry<Integer, LinkedList<User>> usersByFloor : waitingUsers.entrySet()) {
-            score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, usersByFloor.getKey(), usersByFloor.getValue(), peopleInElevator);
+
+        for (int floor = currentFloor; currentDirection == Direction.UP && floor <= higherFloor
+                || currentDirection == Direction.DOWN && floor >= lowerFloor; floor += currentDirection.incForCurrentFloor) {
+            if (toGoUsers.containsKey(floor)) {
+                score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, floor, toGoUsers.get(floor), peopleInElevator);
+            }
+            if (waitingUsers.containsKey(floor)) {
+                score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, floor, waitingUsers.get(floor), peopleInElevator);
+            }
         }
         return score;
     }
@@ -198,7 +205,9 @@ public class ByUserElevator extends CleverElevator {
             if (currentFloor != floorOfUser && openOnCurrentFloor) {
                 scoreOfUser = scoreOfUser - 2;
             }
-            if (scoreOfUser > 0) {
+            if(!hasScore) {
+                score += 999999 - (100 * Math.abs(currentFloor - floorOfUser));
+            } else if (scoreOfUser > 0) {
                 score += scoreOfUser;
             }
         }

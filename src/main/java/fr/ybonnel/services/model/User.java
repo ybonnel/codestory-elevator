@@ -44,7 +44,7 @@ public class User {
     }
 
     public int esperateScore(int currentTick, int currentFloor) {
-        int baseScore = 20;
+        int baseScore = 21;
 
         int neededTicks = destinationFloor == null ? 0
                 : Math.abs(destinationFloor - startFloor) + 2;

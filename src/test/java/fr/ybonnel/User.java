@@ -16,12 +16,15 @@
  */
 package fr.ybonnel;
 
+import fr.ybonnel.services.model.Direction;
+
 public class User {
 
     private final int tickEnterBuilding;
     private final int startFloor;
     private final int destinationFloor;
     private int tickEnterElevator = -1;
+    private int indexElevator = -1;
 
     public User(int tickEnterBuilding, int startFloor, int destinationFloor) {
         this.tickEnterBuilding = tickEnterBuilding;
@@ -29,28 +32,51 @@ public class User {
         this.destinationFloor = destinationFloor;
     }
 
-    public void enterElevator(int tick) {
+    public void enterElevator(int tick, int indexElevator) {
         tickEnterElevator = tick;
+        this.indexElevator = indexElevator;
     }
 
     public int exitElevatorAndComputeScore(int tick) {
-        int score = 20 + 2 + Math.abs(startFloor - destinationFloor) - ((tickEnterElevator - tickEnterBuilding) / 2) - (tick - tickEnterElevator);
+        int score = 21 + 2 + Math.abs(startFloor - destinationFloor) - ((tickEnterElevator - tickEnterBuilding) / 2) - (tick - tickEnterElevator);
         if (score < 0) {
             score = 0;
         }
         return score;
     }
 
-    public boolean isInElevator() {
-        return tickEnterElevator != -1;
+    public boolean isInElevator(int indexElevator) {
+        return this.indexElevator == indexElevator;
     }
 
+    public boolean isInOneElevator() {
+        return this.indexElevator != -1;
+    }
+
+    public int getIndexElevator() {
+        return indexElevator;
+    }
 
     public int getDestinationFloor() {
         return destinationFloor;
     }
 
+    public Direction directionWished() {
+        return destinationFloor - startFloor < 0 ? Direction.DOWN : Direction.UP;
+    }
+
     public int getStartFloor() {
         return startFloor;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "tickEnterBuilding=" + tickEnterBuilding +
+                ", startFloor=" + startFloor +
+                ", destinationFloor=" + destinationFloor +
+                ", tickEnterElevator=" + tickEnterElevator +
+                ", indexElevator=" + indexElevator +
+                '}';
     }
 }
