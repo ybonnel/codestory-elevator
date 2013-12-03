@@ -123,6 +123,8 @@ public class Simulator {
             System.out.println(i);
         }
 
+        simulator.executorService.shutdown();
+
         Collections.sort(simulator.elevatorsWithStates, new Comparator<ElevatorsWithState>() {
             @Override
             public int compare(ElevatorsWithState o1, ElevatorsWithState o2) {
