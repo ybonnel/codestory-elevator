@@ -93,4 +93,8 @@ public class User {
         }
         return results;
     }
+
+    public int getStartFloor() {
+        return startFloor;
+    }
 }

@@ -1,5 +1,7 @@
 package fr.ybonnel;
 
+import fr.ybonnel.services.ByUser2Elevator;
+import fr.ybonnel.services.ByUser2Elevators;
 import fr.ybonnel.services.ByUserElevator;
 import fr.ybonnel.services.ByUserElevators;
 import fr.ybonnel.services.ElevatorService;
@@ -58,7 +60,7 @@ public class Main {
             }
         });
 
-        final ByUserElevators elevators = new ByUserElevators();
+        final ByUser2Elevators elevators = new ByUser2Elevators();
         new ElevatorService("/elevator", elevators).registerRoutes();
 
         get(new Route<Void, String>("/status", Void.class, ContentType.PLAIN_TEXT){
@@ -67,11 +69,9 @@ public class Main {
             public Response<String> handle(Void param, RouteParameters routeParams) throws HttpErrorException {
                 StringBuilder builder = new StringBuilder();
                 int index = 0;
-                for (ByUserElevator elevator : elevators.getElevators()) {
+                for (ByUser2Elevator elevator : elevators.getElevators()) {
                     builder.append("elevator ").append(index++).append(" :").append("\n");
                     builder.append("\tcurrentdirection : ").append(elevator.getCurrentDirection()).append('\n');
-                    builder.append("\tcurrentminfloor : ").append(elevator.getCurrentMinFloor()).append('\n');
-                    builder.append("\tcurrentmaxfloor : ").append(elevator.getCurrentMaxFloor()).append('\n');
                     builder.append("\tbestfloortowait : ").append(elevator.getBestFloorToWait()).append('\n');
                     builder.append("\tcurrenttick : ").append(elevator.getCurrentTick()).append('\n');
                     builder.append("\tcurrentscore : ").append(elevator.getCurrentScore()).append('\n');

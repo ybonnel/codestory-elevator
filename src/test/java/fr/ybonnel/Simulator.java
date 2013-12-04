@@ -18,6 +18,7 @@ package fr.ybonnel;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import fr.ybonnel.services.ByUser2Elevators;
 import fr.ybonnel.services.ByUserElevator;
 import fr.ybonnel.services.ByUserElevators;
 import fr.ybonnel.services.Elevators;
@@ -59,30 +60,8 @@ public class Simulator {
 
     private void runOneTick() throws InterruptedException {
 
-        List<Callable<Void>> runs = new ArrayList<>();
-
         for (final ElevatorsWithState elevatorsWithState : elevatorsWithStates) {
-            runs.add(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    elevatorsWithState.oneTick(currentTick);
-                    return null;
-                }
-            });
-        }
-
-        List<Future<Void>> results = executorService.invokeAll(runs);
-
-        boolean hasFinished = false;
-
-        while (!hasFinished) {
-            hasFinished = true;
-            for (Future<Void> result : results) {
-                if (!result.isDone()) {
-                    hasFinished = false;
-                }
-            }
-            Thread.sleep(1);
+          elevatorsWithState.oneTick(currentTick);
         }
 
         for (int i = 0; i < arrivals.get(currentTick % arrivals.size()); i++) {
@@ -114,13 +93,16 @@ public class Simulator {
         }*/
 
         Simulator simulator = new Simulator(arrivals,
-                new ByUserElevators(false, 10));
+                new ByUserElevators(false, 10),
+                new ByUser2Elevators(false, 10));
 
 
 
         for (int i=0; i<25000; i++) {
             simulator.runOneTick();
-            System.out.println(i);
+            for (ElevatorsWithState elevatorsWithState : simulator.elevatorsWithStates) {
+                System.err.println("Scores of " + elevatorsWithState.getName() + " : " + elevatorsWithState.getScore());
+            }
         }
 
         simulator.executorService.shutdown();
