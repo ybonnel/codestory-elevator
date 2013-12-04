@@ -72,6 +72,7 @@ public class Main {
                     builder.append("\tcurrentdirection : ").append(elevator.getCurrentDirection()).append('\n');
                     builder.append("\tcurrentminfloor : ").append(elevator.getCurrentMinFloor()).append('\n');
                     builder.append("\tcurrentmaxfloor : ").append(elevator.getCurrentMaxFloor()).append('\n');
+                    builder.append("\tbestfloortowait : ").append(elevator.getBestFloorToWait()).append('\n');
                     builder.append("\tcurrenttick : ").append(elevator.getCurrentTick()).append('\n');
                     builder.append("\tcurrentscore : ").append(elevator.getCurrentScore()).append('\n');
                     builder.append("\tresetCount : ").append(elevator.getResetCount()).append('\n');

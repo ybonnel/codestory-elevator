@@ -256,7 +256,7 @@ public class ByUserElevator extends CleverElevator {
     }
 
     @Override
-    int getBestFloorToWait() {
+    public int getBestFloorToWait() {
         if (!hasFloorsToGo()) {
             return currentDirection == Direction.UP ? currentMaxFloor : currentMinFloor;
         } else {
