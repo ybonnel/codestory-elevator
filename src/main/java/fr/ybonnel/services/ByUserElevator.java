@@ -155,6 +155,10 @@ public class ByUserElevator extends CleverElevator {
         this.hasScore = hasScore;
     }
 
+    public Direction getCurrentDirection() {
+        return currentDirection;
+    }
+
     private static class PeopleInElevator {
 
         private PeopleInElevator(int nbUsersInElevator) {
