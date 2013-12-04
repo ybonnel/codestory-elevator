@@ -262,6 +262,7 @@ public class ByUserElevator extends CleverElevator {
                     for (User user : entry.getValue()) {
                         if (user.esperateScore(currentTick, currentFloor) > 0
                                 && entry.getKey() > maxWaitingFloorWithScore
+                                && entry.getKey() >= currentMinFloor
                                 && entry.getKey() <= currentMaxFloor) {
                             maxWaitingFloorWithScore = entry.getKey();
                         }
@@ -278,7 +279,8 @@ public class ByUserElevator extends CleverElevator {
                     for (User user : entry.getValue()) {
                         if (user.esperateScore(currentTick, currentFloor) > 0
                                 && entry.getKey() < minWaitingFloorWithScore
-                                && entry.getKey() >= currentMinFloor) {
+                                && entry.getKey() >= currentMinFloor
+                                && entry.getKey() <= currentMaxFloor) {
                             minWaitingFloorWithScore = entry.getKey();
                         }
                     }
