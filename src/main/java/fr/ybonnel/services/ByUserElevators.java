@@ -159,6 +159,7 @@ public class ByUserElevators implements Elevators {
                         elevator.currentDirection = Direction.UP;
                         elevator.setCurrentMaxFloor(lowerFloor + floorsByCabin);
                         elevator.setCurrentMinFloor(lowerFloor);
+                    } else {
                         elevator.setCurrentMaxFloor(elevator.getCurrentMaxFloor() - floorsByCabin);
                         elevator.setCurrentMinFloor(elevator.getCurrentMinFloor() - floorsByCabin);
                         if (Math.abs(lowerFloor - elevator.getCurrentMinFloor()) < floorsByCabin) {
