@@ -173,7 +173,8 @@ public class ByUserElevator extends CleverElevator {
             if (toGoUsers.containsKey(floor)) {
                 score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, floor, toGoUsers.get(floor), peopleInElevator);
             }
-            if (waitingUsers.containsKey(floor)) {
+            if (waitingUsers.containsKey(floor)
+                    && floor >= currentMinFloor && floor <= currentMaxFloor) {
                 score += estimateScoreForOneFloor(currentFloor, currentDirection, openOnCurrentFloor, floor, waitingUsers.get(floor), peopleInElevator);
             }
         }

@@ -37,7 +37,7 @@ import java.util.concurrent.Future;
 public class Simulator {
 
     private static final int LOWER_FLOOR = -5;
-    private static final int HIGHER_FLOOR = 35;
+    private static final int HIGHER_FLOOR = 48;
     private static final int CABIN_SIZE = 30;
     private static final int CABIN_COUNT = 8;
     private final ExecutorService executorService = Executors.newFixedThreadPool(8);
