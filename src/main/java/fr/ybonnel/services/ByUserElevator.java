@@ -40,6 +40,7 @@ public class ByUserElevator extends CleverElevator {
 
     private int currentTick = -1;
     private int currentScore;
+
     protected Direction currentDirection;
 
     public String state() {
@@ -80,7 +81,8 @@ public class ByUserElevator extends CleverElevator {
 
     public boolean hasUsersForCurrentDirection() {
         for (Map.Entry<Integer, LinkedList<User>> entries : waitingUsers.entrySet()) {
-            if (currentDirection.floorIsOnDirection(currentFloor, entries.getKey())) {
+            if (entries.getKey() >= currentMinFloor && entries.getKey() <= currentMaxFloor
+                    && currentDirection.floorIsOnDirection(currentFloor, entries.getKey())) {
                 for (User user : entries.getValue()) {
                     if ((currentFloor != entries.getKey()
                         || currentDirection == user.getDirectionCalled()) && (user.esperateScore(currentTick, entries.getKey()) > 0 || !hasScore)) {
@@ -90,7 +92,8 @@ public class ByUserElevator extends CleverElevator {
             }
         }
         for (Map.Entry<Integer, LinkedList<User>> entries : toGoUsers.entrySet()) {
-            if (currentDirection.floorIsOnDirection(currentFloor, entries.getKey())) {
+            if (entries.getKey() >= currentMinFloor && entries.getKey() <= currentMaxFloor
+                    && currentDirection.floorIsOnDirection(currentFloor, entries.getKey())) {
                 for (User user : entries.getValue()) {
                     if (user.esperateScore(currentTick, entries.getKey()) > 0
                             || !hasScore) {
@@ -228,24 +231,43 @@ public class ByUserElevator extends CleverElevator {
         toGoUsers.get(floorToGo).addLast(user);
     }
 
+    private int currentMinFloor;
+    private int currentMaxFloor;
+
+    public void setCurrentMinFloor(int currentMinFloor) {
+        this.currentMinFloor = currentMinFloor;
+    }
+
+    public void setCurrentMaxFloor(int currentMaxFloor) {
+        this.currentMaxFloor = currentMaxFloor;
+    }
+
+    public int getCurrentMinFloor() {
+        return currentMinFloor;
+    }
+
+    public int getCurrentMaxFloor() {
+        return currentMaxFloor;
+    }
+
     @Override
     int getBestFloorToWait() {
         if (!hasFloorsToGo()) {
-            return currentDirection == Direction.UP ? higherFloor - ((higherFloor - lowerFloor) / 3)
-                : lowerFloor + ((higherFloor - lowerFloor) / 3);
+            return currentDirection == Direction.UP ? currentMaxFloor : currentMinFloor;
         } else {
             if (currentDirection == Direction.UP) {
                 int maxWaitingFloorWithScore = Integer.MIN_VALUE;
                 for (Map.Entry<Integer, LinkedList<User>> entry : waitingUsers.entrySet()) {
                     for (User user : entry.getValue()) {
                         if (user.esperateScore(currentTick, currentFloor) > 0
-                                && entry.getKey() > maxWaitingFloorWithScore) {
+                                && entry.getKey() > maxWaitingFloorWithScore
+                                && entry.getKey() <= currentMaxFloor) {
                             maxWaitingFloorWithScore = entry.getKey();
                         }
                     }
                 }
                 if (maxWaitingFloorWithScore == Integer.MIN_VALUE) {
-                    return higherFloor - ((higherFloor - lowerFloor) / 3);
+                    return currentMaxFloor;
                 } else {
                     return maxWaitingFloorWithScore;
                 }
@@ -254,13 +276,14 @@ public class ByUserElevator extends CleverElevator {
                 for (Map.Entry<Integer, LinkedList<User>> entry : waitingUsers.entrySet()) {
                     for (User user : entry.getValue()) {
                         if (user.esperateScore(currentTick, currentFloor) > 0
-                                && entry.getKey() < minWaitingFloorWithScore) {
+                                && entry.getKey() < minWaitingFloorWithScore
+                                && entry.getKey() >= currentMinFloor) {
                             minWaitingFloorWithScore = entry.getKey();
                         }
                     }
                 }
                 if (minWaitingFloorWithScore == Integer.MAX_VALUE) {
-                    return lowerFloor + ((higherFloor - lowerFloor) / 3);
+                    return currentMinFloor;
                 } else {
                     return minWaitingFloorWithScore;
                 }

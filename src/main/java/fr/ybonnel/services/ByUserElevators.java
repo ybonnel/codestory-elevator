@@ -40,7 +40,7 @@ public class ByUserElevators implements Elevators {
 
     private List<Integer> peopleByTick = new ArrayList<>();
     private final boolean log;
-    private int maxWaitingsMean = 500;
+    private int maxWaitingsMean = 10;
     private int lowerFloor;
     private int higherFlor;
 
@@ -139,8 +139,34 @@ public class ByUserElevators implements Elevators {
             if (log) {
                 logger.info("Change direction : hasScore({}), mustChangeDirectionToBetterScore({})", hasScore, mustChangeDirectionToBetterScore);
             }
+            int midCabin = elevators.size() / 2;
+            int floorsByCabin = (higherFlor - lowerFloor) / midCabin;
             for (ByUserElevator elevator : elevators) {
-                elevator.currentDirection = elevator.currentDirection.getOtherDirection();
+                if (elevator.currentDirection == Direction.UP) {
+                    if (elevator.getCurrentMaxFloor() == higherFlor) {
+                        elevator.currentDirection = Direction.DOWN;
+                        elevator.setCurrentMaxFloor(higherFlor);
+                        elevator.setCurrentMinFloor(lowerFloor + (floorsByCabin * (midCabin - 1)));
+                    } else {
+                        elevator.setCurrentMaxFloor(elevator.getCurrentMaxFloor() + floorsByCabin);
+                        elevator.setCurrentMinFloor(elevator.getCurrentMinFloor() + floorsByCabin);
+                        if (Math.abs(higherFlor - elevator.getCurrentMaxFloor()) < floorsByCabin) {
+                            elevator.setCurrentMaxFloor(higherFlor);
+                        }
+                    }
+                } else {
+                    if (elevator.getCurrentMinFloor() == lowerFloor) {
+                        elevator.currentDirection = Direction.UP;
+                        elevator.setCurrentMaxFloor(lowerFloor + floorsByCabin);
+                        elevator.setCurrentMinFloor(lowerFloor);
+                        elevator.setCurrentMaxFloor(elevator.getCurrentMaxFloor() - floorsByCabin);
+                        elevator.setCurrentMinFloor(elevator.getCurrentMinFloor() - floorsByCabin);
+                        if (Math.abs(lowerFloor - elevator.getCurrentMinFloor()) < floorsByCabin) {
+                            elevator.setCurrentMaxFloor(lowerFloor);
+                        }
+                    }
+                }
+
             }
         }
 
@@ -188,12 +214,15 @@ public class ByUserElevators implements Elevators {
         this.lowerFloor = lowerFloor;
         this.higherFlor = higherFloor;
         this.cabinSize = cabinSize;
+        int midCabin = cabinCount / 2;
         Direction direction = Direction.DOWN;
         if (cabinCount != elevators.size()) {
             elevators.clear();
             for (int cabinIndex = 0; cabinIndex < cabinCount; cabinIndex++) {
+                if (cabinCount == midCabin) {
+                    direction = direction.getOtherDirection();
+                }
                 elevators.add(new ByUserElevator(waitingUsers, direction));
-                direction = direction.getOtherDirection();
             }
         }
 
@@ -202,9 +231,24 @@ public class ByUserElevators implements Elevators {
             peopleByTick.clear();
         }
 
+        direction = Direction.DOWN;
+        int cabinIndex = 0;
+        int cabinIndexForDirection = 0;
+        int floorsByCabin = (higherFloor - lowerFloor) / midCabin;
         for (ByUserElevator elevator : elevators) {
+            if (cabinIndex == midCabin) {
+                direction = direction.getOtherDirection();
+                cabinIndexForDirection = 0;
+            }
             elevator.reset(cause, lowerFloor, higherFloor, cabinSize, direction);
-            direction = direction.getOtherDirection();
+            elevator.setCurrentMinFloor(lowerFloor + floorsByCabin * cabinIndexForDirection);
+
+            elevator.setCurrentMaxFloor(cabinIndexForDirection == (midCabin - 1)
+                    ? higherFloor
+                    : lowerFloor + floorsByCabin * (cabinIndexForDirection + 1));
+
+            cabinIndexForDirection++;
+            cabinIndex++;
         }
     }
 
