@@ -219,7 +219,7 @@ public class ByUser2Elevators implements Elevators {
         int cabinIndex = 0;
         for (ByUser2Elevator elevator : elevators) {
             double percentile = ((double)cabinIndex + 0.5)/ ((double)elevators.size());
-            int bestFloorToWait = (int) Math.round(statsCalls.getPercentile(percentile));
+            int bestFloorToWait = (int) Math.round(statsCalls.getPercentile(percentile*100));
             elevator.setBestFloorToWait(bestFloorToWait);
             cabinIndex++;
         }

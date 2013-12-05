@@ -57,7 +57,7 @@ public class ElevatorsWithState {
             currentStates.add(State.CLOSE);
             currentFloors.add(0);
         }
-        reset("the elevator is at floor ");
+        reset("all elevators are at floor ");
     }
 
     public void addUser(int tickEnterBuilding, int startFloor, int destinationFloor) {
