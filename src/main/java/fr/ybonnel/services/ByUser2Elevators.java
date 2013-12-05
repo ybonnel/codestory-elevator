@@ -202,11 +202,13 @@ public class ByUser2Elevators implements Elevators {
             currentTick = -1;
             peopleByTick.clear();
             statsCalls.clear();
+        }
+
+        if (statsCalls.getN() == 0) {
             for (int floor = lowerFloor; floor <= higherFloor; floor++) {
                 statsCalls.addValue(floor);
             }
         }
-
         Direction currentDirection = Direction.DOWN;
         for (ByUser2Elevator elevator : elevators) {
             elevator.reset(cause, lowerFloor, higherFloor, cabinSize, currentDirection);
