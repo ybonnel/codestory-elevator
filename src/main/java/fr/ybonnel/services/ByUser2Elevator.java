@@ -19,8 +19,6 @@ package fr.ybonnel.services;
 import fr.ybonnel.services.model.Command;
 import fr.ybonnel.services.model.Direction;
 import fr.ybonnel.services.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class ByUser2Elevator extends CleverElevator {
+
     private int bestFloorToWait;
 
     public void setBestFloorToWait(int bestFloorToWait) {
@@ -83,7 +82,7 @@ public class ByUser2Elevator extends CleverElevator {
                         return openIfCan();
                     }
 
-                    if (scoreIfNoOpen == 0) {
+                    if (scoreIfNoOpen == 0 && !thereIsUsersWaitingForCurrentDirectionWithScore()) {
                         currentDirection = currentDirection.getOtherDirection();
                         scoreIfOpen = estimateScore(currentFloor, currentDirection, true);
                         scoreIfNoOpen = estimateScore(currentFloor, currentDirection, false);
@@ -119,6 +118,19 @@ public class ByUser2Elevator extends CleverElevator {
         for (int floor = currentFloor + currentDirection.incForCurrentFloor; currentDirection == Direction.UP && floor <= higherFloor || currentDirection == Direction.DOWN && floor >= lowerFloor; floor += currentDirection.incForCurrentFloor) {
             if (waitingUsers.containsKey(floor) || toGoUsers.containsKey(floor)) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean thereIsUsersWaitingForCurrentDirectionWithScore() {
+        for (int floor = currentFloor + currentDirection.incForCurrentFloor; currentDirection == Direction.UP && floor <= higherFloor || currentDirection == Direction.DOWN && floor >= lowerFloor; floor += currentDirection.incForCurrentFloor) {
+            if (waitingUsers.containsKey(floor)) {
+                for (User user : waitingUsers.get(floor)) {
+                    if (user.esperateScore(currentTick, currentFloor) > 0) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
