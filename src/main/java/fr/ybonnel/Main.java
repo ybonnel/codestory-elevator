@@ -77,6 +77,7 @@ public class Main {
                     builder.append("\tcurrentscore : ").append(elevator.getCurrentScore()).append('\n');
                     builder.append("\tresetCount : ").append(elevator.getResetCount()).append('\n');
                 }
+                builder.append("\nCallsByFloor : ").append("\n").append(elevators.getCallsByFloor());
                 builder.append("\nPeopleByTick : ").append("\n").append(elevators.getPeopleByTick());
 
                 return new Response<>(builder.toString());

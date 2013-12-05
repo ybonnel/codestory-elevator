@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class ByUser2Elevators implements Elevators {
 
@@ -40,6 +41,8 @@ public class ByUser2Elevators implements Elevators {
     private List<ByUser2Elevator> elevators = new ArrayList<>();
 
     private List<Integer> peopleByTick = new ArrayList<>();
+    private Map<Integer, Integer> callsByFloor = new TreeMap<>();
+    private DescriptiveStatistics statsCalls = new DescriptiveStatistics(500);
     private int maxWaitingsMean = 10;
     private int lowerFloor;
     private int higherFlor;
@@ -136,55 +139,29 @@ public class ByUser2Elevators implements Elevators {
         }
         waitingUsersCount.put(floor, waitingUsersCount.get(floor) + 1);
 
+        if (!callsByFloor.containsKey(floor)) {
+            callsByFloor.put(floor, 0);
+        }
+        callsByFloor.put(floor, callsByFloor.get(floor) + 1);
+
+        statsCalls.addValue(floor);
+        setBestFloorToWaitToElevators();
+
         User user = new User(floor, currentTick, Direction.valueOf(to));
 
         getBestElevatorForUser(user).addUserWaiting(user);
     }
 
     private ByUser2Elevator getBestElevatorForUser(User user) {
-        // Try to find an elevator nearest with good direction or at least just the nearest.
-        ByUser2Elevator nearestElevatorWithDirection = null;
+        // Try to find the nearest elevator.
         ByUser2Elevator nearestElevator = null;
-        ByUser2Elevator nearestFreeElevator = null;
         for (ByUser2Elevator elevator : elevators) {
-            if (elevator.currentDirection == user.getDirectionCalled()
-                    && elevator.currentDirection.floorIsOnDirection(elevator.currentFloor, user.getStartFloor())) {
-                if (nearestElevatorWithDirection == null) {
-                    nearestElevatorWithDirection = elevator;
-                } else {
-                    if (Math.abs(elevator.currentFloor - user.getStartFloor()) < Math.abs(nearestElevatorWithDirection.currentFloor - user.getStartFloor())) {
-                        nearestElevatorWithDirection = elevator;
-                    }
-                }
-            }
-            if (!elevator.hasUsersWithScores()) {
-                if (nearestFreeElevator == null || Math.abs(elevator.currentFloor - user.getStartFloor()) < Math.abs(nearestFreeElevator.currentFloor - user.getStartFloor())) {
-                    nearestFreeElevator = elevator;
-                }
-            }
             if (nearestElevator == null || Math.abs(elevator.currentFloor - user.getStartFloor()) < Math.abs(nearestElevator.currentFloor - user.getStartFloor())) {
                 nearestElevator = elevator;
             }
         }
 
         return nearestElevator;
-        /*if (nearestElevatorWithDirection == null && nearestFreeElevator == null) {
-            return nearestElevator;
-        }
-
-        if (nearestFreeElevator == null) {
-            return nearestElevatorWithDirection;
-        }
-        if (nearestElevatorWithDirection == null) {
-            return nearestFreeElevator;
-        }
-
-        if (Math.abs(nearestFreeElevator.currentFloor - user.getStartFloor())
-                < Math.abs(nearestElevatorWithDirection.currentFloor - user.getStartFloor()) + nearestElevatorWithDirection.howManyFloorsWithScores()*50) {
-            return nearestFreeElevator;
-        }
-
-        return nearestElevatorWithDirection;*/
     }
 
     @Override
@@ -213,6 +190,7 @@ public class ByUser2Elevators implements Elevators {
         waitingUsersCount.clear();
         this.lowerFloor = lowerFloor;
         this.higherFlor = higherFloor;
+        callsByFloor.clear();
         if (cabinCount != elevators.size()) {
             elevators.clear();
             for (int cabinIndex = 0; cabinIndex < cabinCount; cabinIndex++) {
@@ -223,17 +201,26 @@ public class ByUser2Elevators implements Elevators {
         if (cause.startsWith("all elevators are at floor")) {
             currentTick = -1;
             peopleByTick.clear();
+            statsCalls.clear();
+            for (int floor = lowerFloor; floor <= higherFloor; floor++) {
+                statsCalls.addValue(floor);
+            }
         }
 
-        int cabinIndex = 0;
-        double nbFloors = higherFloor - lowerFloor + 1;
-        double floorsByCabin = nbFloors / ((double)cabinCount);
         Direction currentDirection = Direction.DOWN;
         for (ByUser2Elevator elevator : elevators) {
             elevator.reset(cause, lowerFloor, higherFloor, cabinSize, currentDirection);
-            int bestFloorToWait = (int) Math.round(((double)lowerFloor) + floorsByCabin * (double)cabinIndex + (floorsByCabin /(2d)));
-            elevator.setBestFloorToWait(bestFloorToWait);
             currentDirection = currentDirection.getOtherDirection();
+        }
+        setBestFloorToWaitToElevators();
+    }
+
+    private void setBestFloorToWaitToElevators() {
+        int cabinIndex = 0;
+        for (ByUser2Elevator elevator : elevators) {
+            double percentile = ((double)cabinIndex + 0.5)/ ((double)elevators.size());
+            int bestFloorToWait = (int) Math.round(statsCalls.getPercentile(percentile));
+            elevator.setBestFloorToWait(bestFloorToWait);
             cabinIndex++;
         }
     }
@@ -244,5 +231,9 @@ public class ByUser2Elevators implements Elevators {
 
     public List<Integer> getPeopleByTick() {
         return peopleByTick;
+    }
+
+    public Map<Integer, Integer> getCallsByFloor() {
+        return callsByFloor;
     }
 }
