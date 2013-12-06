@@ -222,12 +222,28 @@ public class ByUser2Elevators implements Elevators {
     }
 
     private void setBestFloorToWaitToElevators() {
-        int cabinIndex = 0;
-        for (ByUser2Elevator elevator : elevators) {
+        List<Integer> bestFloorsToWait = new ArrayList<>();
+        for (int cabinIndex = 0; cabinIndex < elevators.size(); cabinIndex++) {
             double percentile = ((double)cabinIndex + 0.5)/ ((double)elevators.size());
             int bestFloorToWait = (int) Math.round(statsCalls.getPercentile(percentile*100));
-            elevator.setBestFloorToWait(bestFloorToWait);
-            cabinIndex++;
+            bestFloorsToWait.add(bestFloorToWait);
+        }
+
+        List<ByUser2Elevator> elevatorsToSet = new LinkedList<>(elevators);
+
+        for (int bestFloorToWait : bestFloorsToWait) {
+
+            ByUser2Elevator nearestElevator = null;
+            for (ByUser2Elevator elevator : elevatorsToSet) {
+                if (nearestElevator == null || Math.abs(elevator.currentFloor - bestFloorToWait) < Math.abs(nearestElevator.currentFloor - bestFloorToWait)) {
+                    nearestElevator = elevator;
+                }
+            }
+
+            if (nearestElevator != null) {
+                nearestElevator.setBestFloorToWait(bestFloorToWait);
+                elevatorsToSet.remove(nearestElevator);
+            }
         }
     }
 
@@ -241,5 +257,9 @@ public class ByUser2Elevators implements Elevators {
 
     public Map<Integer, Integer> getCallsByFloor() {
         return callsByFloor;
+    }
+
+    public int getMaxWaitingMean() {
+        return maxWaitingsMean;
     }
 }

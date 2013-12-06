@@ -86,19 +86,17 @@ public class Simulator {
                 new InputStreamReader(Simulator.class.getResourceAsStream("/repartition.json")),
                 new TypeToken<List<Integer>>(){}.getType());
 
-        /*List<ByUserElevators> elevators = new ArrayList<>();
-
-        for (int maxWaitings = 10; maxWaitings < 500; maxWaitings+=1) {
-            elevators.add(new ByUserElevators(false, maxWaitings));
-        }*/
+        //List<ByUser2Elevators> elevators = new ArrayList<>();
 
         Simulator simulator = new Simulator(arrivals,
-                new ByUserElevators(false, 10),
-                new ByUser2Elevators(false, 10));
+                //new ByUserElevators(false, 10),
+                new ByUser2Elevators(false, 10),
+                new ByUser2Elevators()
+        );
 
 
 
-        for (int i=0; i<25000; i++) {
+        for (int i=0; i<arrivals.size()*2; i++) {
             simulator.runOneTick();
             for (ElevatorsWithState elevatorsWithState : simulator.elevatorsWithStates) {
                 System.err.println("Scores of " + elevatorsWithState.getName() + " : " + elevatorsWithState.getScore());

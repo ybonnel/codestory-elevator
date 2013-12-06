@@ -16,6 +16,7 @@
  */
 package fr.ybonnel;
 
+import fr.ybonnel.services.ByUser2Elevators;
 import fr.ybonnel.services.ByUserElevators;
 import fr.ybonnel.services.Elevators;
 import fr.ybonnel.services.model.Command;
@@ -198,8 +199,9 @@ public class ElevatorsWithState {
 
     public String getName() {
         String name = elevators.getClass().getSimpleName();
-        if (elevators instanceof ByUserElevators) {
-            name += "(" + ((ByUserElevators) elevators).getMaxWaitingsMean() + ")";
+        if (elevators instanceof ByUser2Elevators) {
+            name += "(" + ((ByUser2Elevators)elevators).getMaxWaitingMean()
+                    + ")";
         }
         return name;
     }
