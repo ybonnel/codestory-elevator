@@ -80,6 +80,7 @@ public class ByUser2Elevators implements Elevators {
         currentTick++;
         peopleByTick.add(0);
 
+        setBestFloorToWaitToElevators();
         assignWaitingsUsers();
 
 
@@ -145,7 +146,6 @@ public class ByUser2Elevators implements Elevators {
         callsByFloor.put(floor, callsByFloor.get(floor) + 1);
 
         statsCalls.addValue(floor);
-        setBestFloorToWaitToElevators();
 
         User user = new User(floor, currentTick, Direction.valueOf(to));
 
