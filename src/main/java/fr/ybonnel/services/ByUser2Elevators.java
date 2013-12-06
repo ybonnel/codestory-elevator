@@ -46,6 +46,7 @@ public class ByUser2Elevators implements Elevators {
     private int maxWaitingsMean = 10;
     private int lowerFloor;
     private int higherFlor;
+    private boolean oldAlgo = false;
 
 
     private static final Logger logger = LoggerFactory.getLogger(ByUser2Elevators.class);
@@ -57,9 +58,10 @@ public class ByUser2Elevators implements Elevators {
     public ByUser2Elevators() {
     }
 
-    public ByUser2Elevators(boolean log, int maxWaiting) {
+    public ByUser2Elevators(boolean oldAlgo, boolean log, int maxWaiting) {
         this.log = log;
         this.maxWaitingsMean = maxWaiting;
+        this.oldAlgo = oldAlgo;
     }
 
     @Override
@@ -198,7 +200,7 @@ public class ByUser2Elevators implements Elevators {
         if (cabinCount != elevators.size()) {
             elevators.clear();
             for (int cabinIndex = 0; cabinIndex < cabinCount; cabinIndex++) {
-                elevators.add(new ByUser2Elevator());
+                elevators.add(new ByUser2Elevator(oldAlgo));
             }
         }
 
@@ -245,6 +247,10 @@ public class ByUser2Elevators implements Elevators {
                 elevatorsToSet.remove(nearestElevator);
             }
         }
+    }
+
+    public boolean getOldAlgo() {
+        return oldAlgo;
     }
 
     public List<ByUser2Elevator> getElevators() {

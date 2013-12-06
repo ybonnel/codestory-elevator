@@ -36,9 +36,10 @@ public class ByUser2Elevator extends CleverElevator {
         this.bestFloorToWait = bestFloorToWait;
     }
 
+    private final boolean oldAlgo;
 
-
-    public ByUser2Elevator() {
+    public ByUser2Elevator(boolean oldAlgo) {
+        this.oldAlgo = oldAlgo;
     }
 
     private int currentTick = -1;
@@ -54,6 +55,13 @@ public class ByUser2Elevator extends CleverElevator {
     @Override
     protected Command getNextCommand() {
         currentTick++;
+
+        if (currentFloor == higherFloor && currentDirection == Direction.UP) {
+            currentDirection = Direction.DOWN;
+        }
+        if (currentFloor == lowerFloor && currentDirection == Direction.DOWN) {
+            currentDirection = Direction.UP;
+        }
 
         if (hasFloorsToGo()) {
             if (isOpen()) {

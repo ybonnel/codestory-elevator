@@ -201,6 +201,7 @@ public class ElevatorsWithState {
         String name = elevators.getClass().getSimpleName();
         if (elevators instanceof ByUser2Elevators) {
             name += "(" + ((ByUser2Elevators)elevators).getMaxWaitingMean()
+                    + "," + ((ByUser2Elevators)elevators).getOldAlgo()
                     + ")";
         }
         return name;
