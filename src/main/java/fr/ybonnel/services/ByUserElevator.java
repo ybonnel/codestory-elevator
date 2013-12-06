@@ -228,7 +228,13 @@ public class ByUserElevator extends CleverElevator {
 
     @Override
     protected void addGo(int floorToGo) {
-        User user = usersJustEntered.removeFirst();
+        User user;
+        if (usersJustEntered.isEmpty()) {
+            user = new User(currentFloor, currentTick, floorToGo > currentFloor ? Direction.UP : Direction.DOWN);
+        } else {
+            user = usersJustEntered.removeFirst();
+        }
+
         user.go(floorToGo, currentTick);
         if (!toGoUsers.containsKey(floorToGo)) {
             toGoUsers.put(floorToGo, new LinkedList<User>());
@@ -307,6 +313,7 @@ public class ByUserElevator extends CleverElevator {
     @Override
     public void userHasEntered() {
         super.userHasEntered();
+        if (!waitingUsers.containsKey(currentFloor)) return;
         Iterator<User> itUsers = waitingUsers.get(currentFloor).iterator();
         boolean userFound = false;
         while (itUsers.hasNext() && !userFound) {

@@ -89,15 +89,15 @@ public class Simulator {
         //List<ByUser2Elevators> elevators = new ArrayList<>();
 
         Simulator simulator = new Simulator(arrivals,
-                //new ByUserElevators(false, 10),
-                new ByUser2Elevators(false, false, 10),
+                new ByUserElevators(false, 10),
+                //new ByUser2Elevators(false, false, 10),
                 new ByUser2Elevators(true,  false, 10)//,
                 //new ByUser2Elevators()
         );
 
 
 
-        for (int i=0; i<arrivals.size()*2; i++) {
+        for (int i=0; i<arrivals.size()*50; i++) {
             simulator.runOneTick();
             for (ElevatorsWithState elevatorsWithState : simulator.elevatorsWithStates) {
                 System.err.println("Scores of " + elevatorsWithState.getName() + " : " + elevatorsWithState.getScore());
