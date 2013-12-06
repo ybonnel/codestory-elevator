@@ -21,12 +21,10 @@ import fr.ybonnel.services.model.Direction;
 import fr.ybonnel.services.model.User;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ByUser2Elevator extends CleverElevator {
 
@@ -278,25 +276,6 @@ public class ByUser2Elevator extends CleverElevator {
             }
         }
         return false;
-    }
-
-    public int howManyFloorsWithScores() {
-        Set<Integer> floors = new HashSet<>();
-        for (Map.Entry<Integer, LinkedList<User>> entries : waitingUsers.entrySet()) {
-            for (User user : entries.getValue()) {
-                if (user.esperateScore(currentTick, currentFloor) > 0) {
-                    floors.add(entries.getKey());
-                }
-            }
-        }
-        for (Map.Entry<Integer, LinkedList<User>> entries : toGoUsers.entrySet()) {
-            for (User user : entries.getValue()) {
-                if (user.esperateScore(currentTick, currentFloor) > 0) {
-                    floors.add(entries.getKey());
-                }
-            }
-        }
-        return floors.size();
     }
 
     @Override

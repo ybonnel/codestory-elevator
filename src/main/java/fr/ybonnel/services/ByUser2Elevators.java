@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -108,6 +109,7 @@ public class ByUser2Elevators implements Elevators {
     }
 
     private void assignWaitingsUsers() {
+
         for (ByUser2Elevator elevator : elevators) {
             Set<Integer> waitingFloorsToRemove = new HashSet<>();
             for (Map.Entry<Integer, LinkedList<User>> users : elevator.getWaitingUsers().entrySet()) {
@@ -224,7 +226,7 @@ public class ByUser2Elevators implements Elevators {
     }
 
     private void setBestFloorToWaitToElevators() {
-        List<Integer> bestFloorsToWait = new ArrayList<>();
+        LinkedList<Integer> bestFloorsToWait = new LinkedList<>();
         for (int cabinIndex = 0; cabinIndex < elevators.size(); cabinIndex++) {
             double percentile = ((double)cabinIndex + 0.5)/ ((double)elevators.size());
             int bestFloorToWait = (int) Math.round(statsCalls.getPercentile(percentile*100));
@@ -234,18 +236,21 @@ public class ByUser2Elevators implements Elevators {
         List<ByUser2Elevator> elevatorsToSet = new LinkedList<>(elevators);
 
         for (int bestFloorToWait : bestFloorsToWait) {
+            assignBestFloorToElevator(elevatorsToSet, bestFloorToWait);
+        }
+    }
 
-            ByUser2Elevator nearestElevator = null;
-            for (ByUser2Elevator elevator : elevatorsToSet) {
-                if (nearestElevator == null || Math.abs(elevator.currentFloor - bestFloorToWait) < Math.abs(nearestElevator.currentFloor - bestFloorToWait)) {
-                    nearestElevator = elevator;
-                }
+    private void assignBestFloorToElevator(List<ByUser2Elevator> elevatorsToSet, int bestFloorToWait) {
+        ByUser2Elevator nearestElevator = null;
+        for (ByUser2Elevator elevator : elevatorsToSet) {
+            if (nearestElevator == null || Math.abs(elevator.currentFloor - bestFloorToWait) < Math.abs(nearestElevator.currentFloor - bestFloorToWait)) {
+                nearestElevator = elevator;
             }
+        }
 
-            if (nearestElevator != null) {
-                nearestElevator.setBestFloorToWait(bestFloorToWait);
-                elevatorsToSet.remove(nearestElevator);
-            }
+        if (nearestElevator != null) {
+            nearestElevator.setBestFloorToWait(bestFloorToWait);
+            elevatorsToSet.remove(nearestElevator);
         }
     }
 

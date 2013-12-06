@@ -91,8 +91,8 @@ public class Simulator {
         Simulator simulator = new Simulator(arrivals,
                 //new ByUserElevators(false, 10),
                 new ByUser2Elevators(false, false, 10),
-                new ByUser2Elevators(true,  false, 10),
-                new ByUser2Elevators()
+                new ByUser2Elevators(true,  false, 10)//,
+                //new ByUser2Elevators()
         );
 
 
