@@ -72,6 +72,7 @@ public class Main {
                 for (ByUser2Elevator elevator : elevators.getElevators()) {
                     builder.append("elevator ").append(index++).append(" :").append("\n");
                     builder.append("\tcurrentdirection : ").append(elevator.getCurrentDirection()).append('\n');
+                    builder.append("\tcurrentfloor : ").append(elevator.getCurrentFloor()).append('\n');
                     builder.append("\tbestfloortowait : ").append(elevator.getBestFloorToWait()).append('\n');
                     builder.append("\tcurrenttick : ").append(elevator.getCurrentTick()).append('\n');
                     builder.append("\tcurrentscore : ").append(elevator.getCurrentScore()).append('\n');
