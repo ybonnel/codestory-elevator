@@ -90,14 +90,14 @@ public class Simulator {
 
         Simulator simulator = new Simulator(arrivals,
                 new ByUserElevators(false, 10),
-                //new ByUser2Elevators(false, false, 10),
+                new ByUser2Elevators(false, false, 10),
                 new ByUser2Elevators(true,  false, 10)//,
                 //new ByUser2Elevators()
         );
 
 
 
-        for (int i=0; i<arrivals.size()*50; i++) {
+        for (int i=0; i<arrivals.size(); i++) {
             simulator.runOneTick();
             for (ElevatorsWithState elevatorsWithState : simulator.elevatorsWithStates) {
                 System.err.println("Scores of " + elevatorsWithState.getName() + " : " + elevatorsWithState.getScore());
