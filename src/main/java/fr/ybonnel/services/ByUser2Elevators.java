@@ -163,7 +163,10 @@ public class ByUser2Elevators implements Elevators {
             if (nearestElevator == null || Math.abs(elevator.currentFloor - user.getStartFloor()) < Math.abs(nearestElevator.currentFloor - user.getStartFloor())) {
                 nearestElevator = elevator;
             } else if (Math.abs(elevator.currentFloor - user.getStartFloor()) == Math.abs(nearestElevator.currentFloor - user.getStartFloor())) {
-                if (Math.abs(elevator.getBestFloorToWait() - user.getStartFloor()) < Math.abs(nearestElevator.getBestFloorToWait() - user.getStartFloor())) {
+                if (elevator.hasUsersWithScores()
+                        != nearestElevator.hasUsersWithScores()) {
+                    nearestElevator = elevator.hasUsersWithScores() ? nearestElevator : elevator;
+                } else if (Math.abs(elevator.getBestFloorToWait() - user.getStartFloor()) < Math.abs(nearestElevator.getBestFloorToWait() - user.getStartFloor())) {
                     nearestElevator = elevator;
                 }
             }
